@@ -1,4 +1,4 @@
-import os
+# import os
 import streamlit as st
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -12,8 +12,8 @@ from models import Base
 SUPABASE_URL = st.secrets["supabase"]["url"]
 SUPABASE_PASSWORD = st.secrets["supabase"]["password"]
 
-if "db." not in SUPABASE_URL:
-    SUPABASE_URL = f"db.{SUPABASE_URL}"
+#if "db." not in SUPABASE_URL:
+#    SUPABASE_URL = f"db.{SUPABASE_URL}"
 
 DATABASE_URL = f"postgresql://postgres:{SUPABASE_PASSWORD}@{SUPABASE_URL}:5432/postgres"
 
