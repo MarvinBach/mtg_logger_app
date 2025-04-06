@@ -13,3 +13,6 @@ __pycache__/
 
 # Environment variables (if you use a .env file)
 .env
+
+# Others
+.streamlit/secrets.toml
