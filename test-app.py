@@ -7,7 +7,7 @@ supabase = create_client(
 )
 
 try:
-    response = supabase.table("players").insert({"name": "Marvin"}).execute()
+    response = supabase.table("players").insert({"name": "Yvy"}).execute()
     st.write(f"Insert successful: {response}")
 except Exception as e:
     st.write(f"An error occurred: {e}")
