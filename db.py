@@ -17,18 +17,14 @@ from models import Base
 
 #DATABASE_URL = f"postgresql://postgres:{SUPABASE_PASSWORD}@{SUPABASE_URL}:5432/postgres"
 
-from supabase import create_client
+db_url = st.secrets["DATABASE_FULL_URL"]
 
-url = st.secrets["SUPABASE_URL"]
-key = st.secrets["SUPABASE_KEY"]
-supabase = create_client(url, key)
-
-response = supabase.table("games").select("*").limit(1).execute()
-st.write(response.data)
 
 
 #engine = create_engine(DATABASE_URL, echo=True)
-#SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+engine = create_engine(db_url)
 
-#def init_db():
-#    Base.metadata.create_all(bind=engine)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+def init_db():
+    Base.metadata.create_all(bind=engine)

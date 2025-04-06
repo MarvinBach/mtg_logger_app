@@ -1,23 +1,23 @@
 import streamlit as st
-#from db import SessionLocal, init_db
+from db import SessionLocal, init_db
 #from models import Player, Game
 #from sqlalchemy.exc import IntegrityError
 
 
-from supabase import create_client
+#from supabase import create_client
 
-url = st.secrets["SUPABASE_URL"]
-key = st.secrets["SUPABASE_KEY"]
-supabase = create_client(url, key)
+#url = st.secrets["SUPABASE_URL"]
+#key = st.secrets["SUPABASE_KEY"]
+#supabase = create_client(url, key)
 
-response = supabase.table("games").select("*").limit(1).execute()
-st.write(response.data)
+#response = supabase.table("games").select("*").limit(1).execute()
+#st.write(response.data)
 
 
-#init_db()
+init_db()
 
-#st.title("Magic The Gathering Game Logger")
-#session = SessionLocal()
+st.title("Magic The Gathering Game Logger")
+session = SessionLocal()
 
 #st.header("Add new player")
 #new_player = st.text_input("Player name")
