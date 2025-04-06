@@ -17,7 +17,7 @@ from models import Base
 
 #DATABASE_URL = f"postgresql://postgres:{SUPABASE_PASSWORD}@{SUPABASE_URL}:5432/postgres"
 
-db_url = st.secrets["DATABASE_FULL_URL"]
+db_url = st.secrets["SUPABASE_FULL_URL"]
 
 
 
