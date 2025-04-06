@@ -4,8 +4,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models import Base
 
-from dotenv import load_dotenv
-load_dotenv(".env")
+# from dotenv import load_dotenv
+# load_dotenv(".env")
 
 #SUPABASE_URL = os.getenv("SUPABASE_URL")
 #SUPABASE_PASSWORD = os.getenv("SUPABASE_PASSWORD")
