@@ -1,5 +1,5 @@
 import streamlit as st
-from db import SessionLocal, init_db
+from db_new import SessionLocal, init_db
 from models import Player, Game
 from sqlalchemy.exc import IntegrityError
 
