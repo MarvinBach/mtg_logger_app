@@ -9,19 +9,19 @@ import streamlit as st
 SUPABASE_URL = st.secrets["SUPABASE_URL"]
 SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
 
-# Initialize the Supabase client
-supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+# Ensure SUPABASE_URL has the correct format (add https:// if missing)
+if not SUPABASE_URL.startswith("http"):
+    SUPABASE_URL = f"https://{SUPABASE_URL}"
 
-# Use the Supabase client to get the PostgreSQL connection URL
-# This assumes that Supabase is configured to use PostgreSQL
+# Construct the PostgreSQL connection URL, adding the default port 5432
 DATABASE_URL = f"postgresql://postgres:{SUPABASE_KEY}@{SUPABASE_URL}:5432/postgres"
 
-# Create the engine with the new DATABASE_URL
+# Initialize the SQLAlchemy engine
 engine = create_engine(DATABASE_URL, echo=True)
 
-# Create the sessionmaker
+# Create a sessionmaker instance
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Function to initialize the database (creating tables)
+# Function to initialize the database (create tables if they don't exist)
 def init_db():
     Base.metadata.create_all(bind=engine)
