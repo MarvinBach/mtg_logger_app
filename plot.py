@@ -109,14 +109,14 @@ def plot_player_win_rates_by_color():
     st.markdown(f"**Filtered by**: Format = `{selected_format}`, Edition = `{selected_edition}`")
     st.dataframe(df)
 
-    if not df.empty:
-        fig, ax = plt.subplots()
-        ax.bar(df["Color"], df["Win Rate (%)"], color="skyblue")
-        ax.set_title(f"Win Rate per Color for {selected_player_name}")
-        ax.set_ylabel("Win Rate (%)")
-        ax.set_ylim(0, 100)
-        ax.set_xticks(range(len(df["Color"])))
-        ax.set_xticklabels(df["Color"], rotation=45, ha="right")
-        st.pyplot(fig)
-    else:
-        st.info("No matching game data with selected filters.")
+    #if not df.empty:
+    #    fig, ax = plt.subplots()
+    #    ax.bar(df["Color"], df["Win Rate (%)"], color="skyblue")
+    #    ax.set_title(f"Win Rate per Color for {selected_player_name}")
+    #    ax.set_ylabel("Win Rate (%)")
+    #    ax.set_ylim(0, 100)
+    #    ax.set_xticks(range(len(df["Color"])))
+    #    ax.set_xticklabels(df["Color"], rotation=45, ha="right")
+    #    st.pyplot(fig)
+    #else:
+    #    st.info("No matching game data with selected filters.")
