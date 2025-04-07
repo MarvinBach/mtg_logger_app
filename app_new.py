@@ -53,7 +53,7 @@ else:
             st.success(f"Game result added: {winner} defeated {loser} in {game_format} format!")
 
 st.header("Game History")
-games = get_recent_games(limit=10)
+games = get_recent_games(limit=5)
 for g in games:
     winner_name = get_player_by_id(g["winner_id"])
     loser_name = get_player_by_id(g["loser_id"])
