@@ -1,10 +1,8 @@
 import streamlit as st
 from supabase import create_client
 
-supabase = create_client(
-    st.secrets["SUPABASE_URL"],
-    st.secrets["SUPABASE_KEY"]
-)
+supabase = create_client(st.secrets["SUPABASE_URL"], st.secrets["SUPABASE_KEY"])
+
 
 class Player:
     def __init__(self, id: int = None, name: str = None):
@@ -32,13 +30,29 @@ class Player:
     @classmethod
     def get_by_id(cls, player_id: int):
         """Get player name by ID"""
-        response = supabase.table("players").select("name").eq("id", player_id).limit(1).execute()
+        response = (
+            supabase.table("players")
+            .select("name")
+            .eq("id", player_id)
+            .limit(1)
+            .execute()
+        )
         if response.data:
             return response.data[0]["name"]
         return "Unknown"
 
+
 class Game:
-    def __init__(self, winner_id, loser_id, game_format, edition, winner_colors, loser_colors, game_id=None):
+    def __init__(
+        self,
+        winner_id,
+        loser_id,
+        game_format,
+        edition,
+        winner_colors,
+        loser_colors,
+        game_id=None,
+    ):
         self.id = game_id
         self.winner_id = winner_id
         self.loser_id = loser_id
@@ -55,7 +69,7 @@ class Game:
             "format": self.game_format,
             "edition": self.edition,
             "winner_colors": self.winner_colors,
-            "loser_colors": self.loser_colors
+            "loser_colors": self.loser_colors,
         }
         response = supabase.table("games").insert(data).execute()
         return response

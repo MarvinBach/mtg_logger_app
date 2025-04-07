@@ -1,9 +1,12 @@
 import streamlit as st
-from db import add_player, delete_player, get_players, add_game, get_recent_games, get_player_by_id
+from db import add_player, get_players, add_game, get_recent_games, get_player_by_id
 from plot import plot_player_win_rates, plot_player_win_rates_by_color
 
 EDITION_OPTIONS = [
-    "Tarkir Dragonstorm", "Innistrad Remastered", "Foundations", "Outlaws of Thunder Junction"
+    "Tarkir Dragonstorm",
+    "Innistrad Remastered",
+    "Foundations",
+    "Outlaws of Thunder Junction",
 ]
 
 COLOR_OPTIONS = ["Blue", "Green", "Red", "White", "Black"]
@@ -20,14 +23,18 @@ if not player_names:
 else:
     winner = st.selectbox("Winner", player_names, key="winner")
     loser = st.selectbox("Loser", player_names, key="loser")
-    game_format = st.selectbox("Format", ["Draft", "Sealed", "Cube Draft", "Constructed", "Commander"])
-    selected_edition = st.selectbox(
-        "Edition (optional)",
-        options=["None"] + EDITION_OPTIONS,
-        index=0
+    game_format = st.selectbox(
+        "Format", ["Draft", "Sealed", "Cube Draft", "Constructed", "Commander"]
     )
-    winner_colors = st.multiselect("Winner's Colors (optional)", options=COLOR_OPTIONS, default=[])
-    loser_colors = st.multiselect("Loser's Colors (optional)", options=COLOR_OPTIONS, default=[])
+    selected_edition = st.selectbox(
+        "Edition (optional)", options=["None"] + EDITION_OPTIONS, index=0
+    )
+    winner_colors = st.multiselect(
+        "Winner's Colors (optional)", options=COLOR_OPTIONS, default=[]
+    )
+    loser_colors = st.multiselect(
+        "Loser's Colors (optional)", options=COLOR_OPTIONS, default=[]
+    )
 
     if st.button("Add Game Result"):
         if winner == loser:
@@ -40,16 +47,20 @@ else:
                 game_format=game_format,
                 selected_edition=edition_to_submit,
                 winner_colors=winner_colors,
-                loser_colors=loser_colors
+                loser_colors=loser_colors,
             )
-            st.success(f"Game result added: {winner} defeated {loser} in {game_format} format!")
+            st.success(
+                f"Game result added: {winner} defeated {loser} in {game_format} format!"
+            )
 
 st.header("Game History")
 games = get_recent_games(limit=5)
 for g in games:
     winner_name = get_player_by_id(g["winner_id"])
     loser_name = get_player_by_id(g["loser_id"])
-    st.write(f"{winner_name} defeated {loser_name} in {g['format']} format on {g['played_at']}")
+    st.write(
+        f"{winner_name} defeated {loser_name} in {g['format']} format on {g['played_at']}"
+    )
 
 
 st.header("Player Win Rates")

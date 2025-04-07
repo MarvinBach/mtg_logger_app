@@ -3,7 +3,8 @@ import pandas as pd
 
 from db import get_player_by_id, get_players, get_recent_games
 
-def plot_player_win_rates() -> None: 
+
+def plot_player_win_rates() -> None:
     games = get_recent_games()
     win_counts = {}
     loss_counts = {}
@@ -20,13 +21,15 @@ def plot_player_win_rates() -> None:
         losses = loss_counts.get(player_id, 0)
         total = wins + losses
         win_rate = round((wins / total) * 100, 2) if total > 0 else 0
-        stats.append({
-            "Player": name,
-            "Wins": wins,
-            "Losses": losses,
-            "Total Games": total,
-            "Win Rate (%)": win_rate
-        })
+        stats.append(
+            {
+                "Player": name,
+                "Wins": wins,
+                "Losses": losses,
+                "Total Games": total,
+                "Win Rate (%)": win_rate,
+            }
+        )
     df = pd.DataFrame(stats).sort_values(by="Win Rate (%)", ascending=False)
     st.dataframe(df)
 
@@ -44,7 +47,8 @@ def plot_player_win_rates_by_color():
     selected_format = st.selectbox("Select Format (optional)", ["All"] + all_formats)
     selected_edition = st.selectbox("Select Edition (optional)", ["All"] + all_editions)
     filtered_games = [
-        g for g in games
+        g
+        for g in games
         if (g["winner_id"] == player_id or g["loser_id"] == player_id)
         and isinstance(g.get("winner_colors"), list)
         and isinstance(g.get("loser_colors"), list)
@@ -69,15 +73,19 @@ def plot_player_win_rates_by_color():
         losses = loss_counts.get(color, 0)
         total = wins + losses
         win_rate = round((wins / total) * 100, 2) if total > 0 else 0
-        stats.append({
-            "Color": color,
-            "Wins": wins,
-            "Losses": losses,
-            "Total Games": total,
-            "Win Rate (%)": win_rate
-        })
+        stats.append(
+            {
+                "Color": color,
+                "Wins": wins,
+                "Losses": losses,
+                "Total Games": total,
+                "Win Rate (%)": win_rate,
+            }
+        )
 
     df = pd.DataFrame(stats)
     st.subheader(f"Win Rates for {selected_player_name} by Color")
-    st.markdown(f"**Filtered by**: Format = `{selected_format}`, Edition = `{selected_edition}`")
+    st.markdown(
+        f"**Filtered by**: Format = `{selected_format}`, Edition = `{selected_edition}`"
+    )
     st.dataframe(df)
