@@ -1,6 +1,11 @@
 import streamlit as st
 from db_new import add_player, get_players, add_game, get_recent_games, get_player_by_id
 
+EDITION_OPTIONS = [
+    "foundations",
+    "outlaws of thunder junction",
+]
+
 st.title("Magic The Gathering Game Logger")
 
 st.header("Add new player")
@@ -22,7 +27,8 @@ if not player_names:
 else:
     winner = st.selectbox("Winner", player_names, key="winner")
     loser = st.selectbox("Loser", player_names, key="loser")
-    game_format = st.selectbox("Format", ["Draft", "Cube", "Commander"])
+    game_format = st.selectbox("Format", ["Draft", "Sealed", "Cube Draft", "Commander"])
+    edition = st.selectbox("Edition", EDITION_OPTIONS)
     winner_colors = st.text_input("Winner's colors (comma-separated)", key="winner_colors")
     loser_colors = st.text_input("Loser's colors (comma-separated)", key="loser_colors")
 
@@ -34,6 +40,7 @@ else:
                 winner_id=player_map[winner],
                 loser_id=player_map[loser],
                 game_format=game_format,
+                edition=edition,
                 winner_colors=winner_colors,
                 loser_colors=loser_colors
             )
