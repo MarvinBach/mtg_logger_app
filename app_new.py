@@ -12,7 +12,7 @@ EDITION_OPTIONS = [
 COLOR_OPTIONS = ["Blue", "Green", "Red", "White", "Black"]
 
 def to_pg_array(py_list):
-    return f"{{{','.join([f'\"{item}\"' for item in py_list])}}}"
+    return "{" + ",".join(py_list) + "}"
 
 st.title("Magic The Gathering Game Logger")
 
