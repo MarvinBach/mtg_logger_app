@@ -7,6 +7,8 @@ EDITION_OPTIONS = [
     "outlaws of thunder junction",
 ]
 
+COLOR_OPTIONS = ["Blue", "Green", "Red", "White", "Black"]
+
 st.title("Magic The Gathering Game Logger")
 
 st.header("Add new player")
@@ -34,8 +36,16 @@ else:
         options=EDITION_OPTIONS,
         index=0
     )
-    winner_colors = st.text_input("Winner's colors (comma-separated)", key="winner_colors")
-    loser_colors = st.text_input("Loser's colors (comma-separated)", key="loser_colors")
+    winner_colors = st.multiselect(
+    "Winner's Colors",
+    options=COLOR_OPTIONS,
+    default=[]
+)
+    loser_colors = st.multiselect(
+    "Loser's Colors",
+    options=COLOR_OPTIONS,
+    default=[]
+)
 
     if st.button("Add Game Result"):
         if winner == loser:
