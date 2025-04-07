@@ -3,8 +3,7 @@ from db_new import add_player, get_players, add_game, get_recent_games, get_play
 
 EDITION_OPTIONS = [
     "",
-    "foundations",
-    "outlaws of thunder junction",
+    "Tarkir Dragonstorm", "Innistrad Remastered", "Foundations", "Outlaws of Thunder Junction"
 ]
 
 COLOR_OPTIONS = ["Blue", "Green", "Red", "White", "Black"]
