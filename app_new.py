@@ -1,6 +1,5 @@
 import streamlit as st
 from db_new import add_player, get_players, add_game, get_recent_games, get_player_by_id
-from supabase import ClientResponseError
 
 st.title("Magic The Gathering Game Logger")
 
@@ -10,7 +9,7 @@ if st.button("Add Player"):
     try:
         add_player(new_player)
         st.success(f"Player {new_player} added successfully!")
-    except ClientResponseError as e:
+    except Exception as e:
         st.error(f"Failed to add player: {e}")
 
 st.header("Add game result")
