@@ -1,6 +1,6 @@
 import streamlit as st
 from db_new import add_player, get_players, add_game, get_recent_games, get_player_by_id
-# from plot import plot_player_win_rates
+from plot import plot_player_win_rates, plot_player_win_rates_by_color
 import matplotlib.pyplot as plt
 import pandas as pd
 
@@ -51,6 +51,13 @@ for g in games:
     loser_name = get_player_by_id(g["loser_id"])
     st.write(f"{winner_name} defeated {loser_name} in {g['format']} format on {g['played_at']}")
 
+
+st.header("Player Win Rates")
+
+plot_player_win_rates()
+
+st.header("Player Win Rate by Color")
+# plot_player_win_rates_by_color()
 
 st.header("Add new player")
 new_player = st.text_input("Player name")
