@@ -81,7 +81,12 @@ player_id = player_map[selected_player_name]
 games = get_recent_games()  # Fetch all recent games (can be optimized if needed)
 
 # Filter games involving the selected player
-player_games = [g for g in games if g["winner_id"] == player_id or g["loser_id"] == player_id]
+player_games = [
+    g for g in games 
+    if (g["winner_id"] == player_id or g["loser_id"] == player_id) and
+       g.get("winner_colors") is not None and
+       g.get("loser_colors") is not None
+]
 
 # Step 4: Calculate wins and losses by color for the selected player
 win_counts = {}
