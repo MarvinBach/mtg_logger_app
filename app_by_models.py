@@ -1,6 +1,7 @@
 import streamlit as st
 from models import Player, Game
 from plot import plot_player_win_rates, plot_player_win_rates_by_color
+from plot_by_models import WinRatePlotter
 
 EDITION_OPTIONS = [
     "Tarkir Dragonstorm", "Innistrad Remastered", "Foundations", "Outlaws of Thunder Junction"
@@ -55,11 +56,17 @@ for g in games:
 
 # --- Player Win Rates ---
 st.header("Player Win Rates")
-plot_player_win_rates()
+plotter = WinRatePlotter()
+plotter.plot_player_win_rates()
 
 # --- Player Win Rate by Color ---
 st.header("Player Win Rate by Color")
-plot_player_win_rates_by_color()
+selected_player_name = st.selectbox("Select Player", player_names)
+selected_format = st.selectbox("Select Format (optional)", ["All", "Draft", "Sealed", "Cube Draft", "Constructed", "Commander"])
+selected_edition = st.selectbox("Select Edition (optional)", ["All"] + EDITION_OPTIONS)
+
+plotter.plot_player_win_rates_by_color(selected_player_name, selected_format, selected_edition)
+
 
 # --- Add New Player ---
 st.header("Add new player")
