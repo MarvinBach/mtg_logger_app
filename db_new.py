@@ -12,18 +12,17 @@ def add_player(name: str):
 def get_players():
     return supabase.table("players").select("*").execute().data
 
-def add_game(winner_id, loser_id, game_format,selected_edition, winner_colors, loser_colors):
-    edition = None if selected_edition == "" else selected_edition
-    winner_colors = None if not winner_colors else ",".join(winner_colors)
-    loser_colors = None if not loser_colors else ",".join(loser_colors)
-    return supabase.table("games").insert({
+def add_game(winner_id, loser_id, game_format, selected_edition, winner_colors, loser_colors):
+    data = {
         "winner_id": winner_id,
         "loser_id": loser_id,
         "format": game_format,
-        "edition": edition,
+        "edition": selected_edition,
         "winner_colors": winner_colors,
         "loser_colors": loser_colors
-    }).execute()
+    }
+    response = supabase.table("games").insert(data).execute()
+    return response
 
 def get_recent_games(limit=None):
     query = supabase.table("games").select("*").order("played_at", desc=True)
