@@ -1,5 +1,5 @@
 import streamlit as st
-from db import add_player, get_players, add_game, get_recent_games, get_player_by_id
+from db import add_player, delete_player, get_players, add_game, get_recent_games, get_player_by_id
 from plot import plot_player_win_rates, plot_player_win_rates_by_color
 
 EDITION_OPTIONS = [
@@ -67,3 +67,20 @@ if st.button("Add Player"):
         st.success(f"Player {new_player} added successfully!")
     except Exception as e:
         st.error(f"Failed to add player: {e}")
+
+
+st.header("Delete a Player")
+players = get_players()
+player_map = {p["name"]: p["id"] for p in players}
+
+if players:
+    selected_player_name = st.selectbox("Select Player to Delete", list(player_map.keys()))
+    if st.button(f"Delete {selected_player_name}"):
+        player_id = player_map[selected_player_name]
+        try:
+            delete_player(player_id)
+            st.success(f"Player {selected_player_name} deleted successfully!")
+        except Exception as e:
+            st.error(f"Failed to delete player: {e}")
+else:
+    st.warning("No players to delete!")

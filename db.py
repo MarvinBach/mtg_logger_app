@@ -12,6 +12,10 @@ def add_player(name: str):
 def get_players():
     return supabase.table("players").select("*").execute().data
 
+def delete_player(player_id: int):
+    response = supabase.table("players").delete().eq("id", player_id).execute()
+    return response
+
 def add_game(winner_id, loser_id, game_format, selected_edition, winner_colors, loser_colors):
     data = {
         "winner_id": winner_id,
