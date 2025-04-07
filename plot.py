@@ -52,48 +52,35 @@ def plot_player_win_rates() -> None:
 
     #st.pyplot(fig)
 
+def plot_player_win_rates_by_color():
+    players = get_players()
+    player_map = {p["name"]: p["id"] for p in players}
 
-def plot_player_win_rates_by_color() -> None:
-    # Step 1: Get the list of players
-    players = get_players()  # Fetch all players
-    player_map = {p["name"]: p["id"] for p in players}  # Map names to player IDs
-
-    # Step 2: Player selection
     selected_player_name = st.selectbox("Select Player", list(player_map.keys()))
-
-    # Step 3: Fetch games for the selected player
     player_id = player_map[selected_player_name]
 
-    # Query games where the selected player is the winner or loser
-    games = get_recent_games()  # Fetch all recent games (can be optimized if needed)
+    games = get_recent_games()
 
-    # Filter games involving the selected player
+    # Filter games with valid color data and where the player participated
     player_games = [
-        g for g in games 
-        if (g["winner_id"] == player_id or g["loser_id"] == player_id) and
-        g.get("winner_colors") is not None and
-        g.get("loser_colors") is not None
+        g for g in games
+        if (g["winner_id"] == player_id or g["loser_id"] == player_id)
+        and isinstance(g.get("winner_colors"), list)
+        and isinstance(g.get("loser_colors"), list)
     ]
 
-    # Step 4: Calculate wins and losses by color for the selected player
     win_counts = {}
     loss_counts = {}
 
     for g in player_games:
-        winner_id = g["winner_id"]
-        loser_id = g["loser_id"]
-
-        if winner_id == player_id:
-            winner_colors = g["winner_colors"]
-            for color in winner_colors:
+        if g["winner_id"] == player_id:
+            for color in g["winner_colors"]:
                 win_counts[color] = win_counts.get(color, 0) + 1
-        elif loser_id == player_id:
-            loser_colors = g["loser_colors"]
-            for color in loser_colors:
+        elif g["loser_id"] == player_id:
+            for color in g["loser_colors"]:
                 loss_counts[color] = loss_counts.get(color, 0) + 1
 
-    # Step 5: Prepare Data for Plotting
-    all_colors = set(win_counts.keys()) | set(loss_counts.keys())
+    all_colors = sorted(set(win_counts.keys()) | set(loss_counts.keys()))
     stats = []
 
     for color in all_colors:
@@ -109,18 +96,20 @@ def plot_player_win_rates_by_color() -> None:
             "Win Rate (%)": win_rate
         })
 
-    df = pd.DataFrame(stats).sort_values(by="Win Rate (%)", ascending=False)
+    df = pd.DataFrame(stats)
 
-    # Step 6: Display Table
     st.subheader(f"Win Rates for {selected_player_name} by Color")
     st.dataframe(df)
 
-    # Step 7: Display Bar Chart
-    fig, ax = plt.subplots()
-    ax.bar(df["Color"], df["Win Rate (%)"], color="skyblue")
-    ax.set_title(f"Win Rate per Color for {selected_player_name}")
-    ax.set_ylabel("Win Rate (%)")
-    ax.set_ylim(0, 100)
-    ax.set_xticklabels(df["Color"], rotation=45, ha="right")
+    if not df.empty:
+        fig, ax = plt.subplots()
+        ax.bar(df["Color"], df["Win Rate (%)"], color="skyblue")
+        ax.set_title(f"Win Rate per Color for {selected_player_name}")
+        ax.set_ylabel("Win Rate (%)")
+        ax.set_ylim(0, 100)
+        ax.set_xticks(range(len(df["Color"])))
+        ax.set_xticklabels(df["Color"], rotation=45, ha="right")
+        st.pyplot(fig)
+    else:
+        st.info("No game data available for selected player with valid color info.")
 
-    st.pyplot(fig)
