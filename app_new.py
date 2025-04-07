@@ -28,7 +28,10 @@ else:
     winner = st.selectbox("Winner", player_names, key="winner")
     loser = st.selectbox("Loser", player_names, key="loser")
     game_format = st.selectbox("Format", ["Draft", "Sealed", "Cube Draft", "Commander"])
-    edition = st.selectbox("Edition", EDITION_OPTIONS)
+    selected_edition = st.selectbox(
+        "Edition",
+        options=[None] + EDITION_OPTIONS,
+        format_func=lambda x: x if x is not None else "No edition")
     winner_colors = st.text_input("Winner's colors (comma-separated)", key="winner_colors")
     loser_colors = st.text_input("Loser's colors (comma-separated)", key="loser_colors")
 
