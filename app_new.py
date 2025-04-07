@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 EDITION_OPTIONS = [
-    "",
     "Tarkir Dragonstorm", "Innistrad Remastered", "Foundations", "Outlaws of Thunder Junction"
 ]
 
@@ -24,8 +23,11 @@ else:
     winner = st.selectbox("Winner", player_names, key="winner")
     loser = st.selectbox("Loser", player_names, key="loser")
     game_format = st.selectbox("Format", ["Draft", "Sealed", "Cube Draft", "Constructed", "Commander"])
-    selected_edition = st.selectbox("Edition", options=EDITION_OPTIONS, index=0)
-
+    selected_edition = st.selectbox(
+        "Edition (optional)",
+        options=["None"] + EDITION_OPTIONS,
+        index=0
+    )
     winner_colors = st.multiselect("Winner's Colors", options=COLOR_OPTIONS, default=[])
     loser_colors = st.multiselect("Loser's Colors", options=COLOR_OPTIONS, default=[])
 
