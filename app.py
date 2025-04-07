@@ -26,8 +26,8 @@ else:
         options=["None"] + EDITION_OPTIONS,
         index=0
     )
-    winner_colors = st.multiselect("Winner's Colors", options=COLOR_OPTIONS, default=[])
-    loser_colors = st.multiselect("Loser's Colors", options=COLOR_OPTIONS, default=[])
+    winner_colors = st.multiselect("Winner's Colors (optional)", options=COLOR_OPTIONS, default=[])
+    loser_colors = st.multiselect("Loser's Colors (optional)", options=COLOR_OPTIONS, default=[])
 
     if st.button("Add Game Result"):
         if winner == loser:
