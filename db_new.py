@@ -12,7 +12,8 @@ def add_player(name: str):
 def get_players():
     return supabase.table("players").select("*").execute().data
 
-def add_game(winner_id, loser_id, game_format,edition, winner_colors, loser_colors):
+def add_game(winner_id, loser_id, game_format,selected_edition, winner_colors, loser_colors):
+    edition = None if selected_edition == "" else selected_edition
     return supabase.table("games").insert({
         "winner_id": winner_id,
         "loser_id": loser_id,

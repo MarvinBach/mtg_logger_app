@@ -2,6 +2,7 @@ import streamlit as st
 from db_new import add_player, get_players, add_game, get_recent_games, get_player_by_id
 
 EDITION_OPTIONS = [
+    "",
     "foundations",
     "outlaws of thunder junction",
 ]
@@ -28,7 +29,7 @@ else:
     winner = st.selectbox("Winner", player_names, key="winner")
     loser = st.selectbox("Loser", player_names, key="loser")
     game_format = st.selectbox("Format", ["Draft", "Sealed", "Cube Draft", "Commander"])
-    edition = st.selectbox(
+    selected_edition = st.selectbox(
         "Edition",
         options=EDITION_OPTIONS,
         index=0
@@ -44,7 +45,7 @@ else:
                 winner_id=player_map[winner],
                 loser_id=player_map[loser],
                 game_format=game_format,
-                edition=edition,
+                selected_edition=selected_edition,
                 winner_colors=winner_colors,
                 loser_colors=loser_colors
             )
