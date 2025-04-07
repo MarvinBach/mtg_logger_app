@@ -57,7 +57,7 @@ st.header("Player Win Rates")
 plot_player_win_rates()
 
 st.header("Player Win Rate by Color")
-# plot_player_win_rates_by_color()
+plot_player_win_rates_by_color()
 
 st.header("Add new player")
 new_player = st.text_input("Player name")
