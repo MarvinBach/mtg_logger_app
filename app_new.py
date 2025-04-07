@@ -11,6 +11,9 @@ EDITION_OPTIONS = [
 
 COLOR_OPTIONS = ["Blue", "Green", "Red", "White", "Black"]
 
+def to_pg_array(py_list):
+    return f"{{{','.join([f'\"{item}\"' for item in py_list])}}}"
+
 st.title("Magic The Gathering Game Logger")
 
 st.header("Add game result")
@@ -23,22 +26,14 @@ if not player_names:
 else:
     winner = st.selectbox("Winner", player_names, key="winner")
     loser = st.selectbox("Loser", player_names, key="loser")
-    game_format = st.selectbox("Format", ["Draft", "Sealed", "Cube Draft","Constructed", "Commander"])
+    game_format = st.selectbox("Format", ["Draft", "Sealed", "Cube Draft", "Constructed", "Commander"])
     selected_edition = st.selectbox(
         "Edition",
         options=EDITION_OPTIONS,
         index=0
     )
-    winner_colors = st.multiselect(
-    "Winner's Colors",
-    options=COLOR_OPTIONS,
-    default=[]
-)
-    loser_colors = st.multiselect(
-    "Loser's Colors",
-    options=COLOR_OPTIONS,
-    default=[]
-)
+    winner_colors = st.multiselect("Winner's Colors", options=COLOR_OPTIONS, default=[])
+    loser_colors = st.multiselect("Loser's Colors", options=COLOR_OPTIONS, default=[])
 
     if st.button("Add Game Result"):
         if winner == loser:
@@ -49,8 +44,8 @@ else:
                 loser_id=player_map[loser],
                 game_format=game_format,
                 selected_edition=selected_edition,
-                winner_colors=winner_colors,
-                loser_colors=loser_colors
+                winner_colors=to_pg_array(winner_colors),
+                loser_colors=to_pg_array(loser_colors)
             )
             st.success(f"Game result added: {winner} defeated {loser} in {game_format} format!")
 
@@ -97,11 +92,11 @@ for g in player_games:
     loser_id = g["loser_id"]
 
     if winner_id == player_id:
-        winner_colors = g["winner_colors"]  # Colors the winner played
+        winner_colors = g["winner_colors"]
         for color in winner_colors:
             win_counts[color] = win_counts.get(color, 0) + 1
     elif loser_id == player_id:
-        loser_colors = g["loser_colors"]  # Colors the loser played
+        loser_colors = g["loser_colors"]
         for color in loser_colors:
             loss_counts[color] = loss_counts.get(color, 0) + 1
 
