@@ -1,6 +1,6 @@
 import streamlit as st
 from db_new import add_player, get_players, add_game, get_recent_games, get_player_by_id
-from plot import plot_player_win_rates
+# from plot import plot_player_win_rates
 import matplotlib.pyplot as plt
 import pandas as pd
 
