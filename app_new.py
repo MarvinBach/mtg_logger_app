@@ -35,12 +35,12 @@ else:
         if winner == loser:
             st.error("Winner and loser cannot be the same player.")
         else:
-            # ✅ Pass colors as raw Python lists
+            edition_to_submit = selected_edition if selected_edition != "None" else None
             add_game(
                 winner_id=player_map[winner],
                 loser_id=player_map[loser],
                 game_format=game_format,
-                selected_edition=selected_edition,
+                selected_edition=edition_to_submit,
                 winner_colors=winner_colors,
                 loser_colors=loser_colors
             )
