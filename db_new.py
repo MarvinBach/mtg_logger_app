@@ -25,8 +25,11 @@ def add_game(winner_id, loser_id, game_format,selected_edition, winner_colors, l
         "loser_colors": loser_colors
     }).execute()
 
-def get_recent_games(limit=10):
-    return supabase.table("games").select("*").order("played_at", desc=True).limit(limit).execute().data
+def get_recent_games(limit=None):
+    query = supabase.table("games").select("*").order("played_at", desc=True)
+    if limit is not None:
+        query = query.limit(limit)
+    return query.execute().data
 
 def get_player_by_id(player_id):
     response = supabase.table("players").select("name").eq("id", player_id).limit(1).execute()
