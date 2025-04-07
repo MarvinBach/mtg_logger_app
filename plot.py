@@ -55,24 +55,31 @@ def plot_player_win_rates() -> None:
 def plot_player_win_rates_by_color():
     players = get_players()
     player_map = {p["name"]: p["id"] for p in players}
-
     selected_player_name = st.selectbox("Select Player", list(player_map.keys()))
     player_id = player_map[selected_player_name]
 
+    # Optional filters
     games = get_recent_games()
+    all_formats = sorted(set(g["format"] for g in games if g.get("format")))
+    all_editions = sorted(set(g["edition"] for g in games if g.get("edition")))
 
-    # Filter games with valid color data and where the player participated
-    player_games = [
+    selected_format = st.selectbox("Select Format (optional)", ["All"] + all_formats)
+    selected_edition = st.selectbox("Select Edition (optional)", ["All"] + all_editions)
+
+    # Filter games
+    filtered_games = [
         g for g in games
         if (g["winner_id"] == player_id or g["loser_id"] == player_id)
         and isinstance(g.get("winner_colors"), list)
         and isinstance(g.get("loser_colors"), list)
+        and (selected_format == "All" or g.get("format") == selected_format)
+        and (selected_edition == "All" or g.get("edition") == selected_edition)
     ]
 
     win_counts = {}
     loss_counts = {}
 
-    for g in player_games:
+    for g in filtered_games:
         if g["winner_id"] == player_id:
             for color in g["winner_colors"]:
                 win_counts[color] = win_counts.get(color, 0) + 1
@@ -99,6 +106,7 @@ def plot_player_win_rates_by_color():
     df = pd.DataFrame(stats)
 
     st.subheader(f"Win Rates for {selected_player_name} by Color")
+    st.markdown(f"**Filtered by**: Format = `{selected_format}`, Edition = `{selected_edition}`")
     st.dataframe(df)
 
     if not df.empty:
@@ -111,5 +119,4 @@ def plot_player_win_rates_by_color():
         ax.set_xticklabels(df["Color"], rotation=45, ha="right")
         st.pyplot(fig)
     else:
-        st.info("No game data available for selected player with valid color info.")
-
+        st.info("No matching game data with selected filters.")
