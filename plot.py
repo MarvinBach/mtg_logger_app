@@ -43,11 +43,11 @@ def plot_player_win_rates() -> None:
     st.dataframe(df)
 
     # Step 5: Show bar chart of win rate
-    fig, ax = plt.subplots()
-    ax.bar(df["Player"], df["Win Rate (%)"], color="skyblue")
-    ax.set_title("Win Rate per Player")
-    ax.set_ylabel("Win Rate (%)")
-    ax.set_ylim(0, 100)
-    ax.set_xticklabels(df["Player"], rotation=45, ha="right")
+    #fig, ax = plt.subplots()
+    #ax.bar(df["Player"], df["Win Rate (%)"], color="skyblue")
+    #ax.set_title("Win Rate per Player")
+    #ax.set_ylabel("Win Rate (%)")
+    #ax.set_ylim(0, 100)
+    #ax.set_xticklabels(df["Player"], rotation=45, ha="right")
 
-    st.pyplot(fig)
+    #st.pyplot(fig)
