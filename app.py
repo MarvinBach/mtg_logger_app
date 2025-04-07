@@ -47,14 +47,3 @@ for g in games:
     winner_name = session.query(Player).get(g.winner_id).name
     loser_name = session.query(Player).get(g.loser_id).name
     st.write(f"{winner_name} defeated {loser_name} in {g.format} format on {g.played_at}.")
-
-
-#-------------
-#from supabase import create_client
-
-#url = st.secrets["SUPABASE_URL"]
-#key = st.secrets["SUPABASE_KEY"]
-#supabase = create_client(url, key)
-
-#response = supabase.table("games").select("*").limit(1).execute()
-#st.write(response.data)
