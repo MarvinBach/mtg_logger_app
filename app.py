@@ -3,6 +3,7 @@ import pandas as pd
 from datetime import datetime
 
 from constants import EDITION_OPTIONS, COLOR_OPTIONS, FORMAT_OPTIONS
+from logger import add_new_player
 from models import Player, Game
 from plot import WinRatePlotter
 
@@ -141,13 +142,4 @@ plotter.plot_player_win_rates_by_color(
 
 # --- Add New Player ---
 st.header("Add new player")
-new_player = st.text_input("Player name")
-if st.button("Add Player"):
-    if not new_player.strip():
-        st.error("Player name cannot be empty.")
-    else:
-        try:
-            Player.add(name=new_player)
-            st.success(f"Player {new_player} added successfully!")
-        except Exception as e:
-            st.error(f"Failed to add player: {e}")
+add_new_player()
