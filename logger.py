@@ -8,9 +8,5 @@ def add_player(name: str) -> str:
         raise ValueError("Player name cannot be empty.")
 
     player = Player(name=name)
-    response = player.add()
-
-    if response.error:
-        raise Exception(f"Supabase error: {response.error}")
-
+    _ = player.add()
     return f"Player {name} added successfully!"
