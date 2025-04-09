@@ -4,12 +4,16 @@ from plot_by_models import WinRatePlotter
 
 EDITION_OPTIONS = [
     "Tarkir Dragonstorm",
+    "Aetherdrift",
     "Innistrad Remastered",
     "Foundations",
+    "Duskmourn",
     "Outlaws of Thunder Junction",
 ]
 
 COLOR_OPTIONS = ["Blue", "Green", "Red", "White", "Black"]
+
+FORMAT_OTPIONS = ["Draft", "Cube Draft", "Sealed", "Constructed", "Commander", "Arena"]
 
 st.title("Magic The Gathering Game Logger")
 
@@ -61,7 +65,7 @@ for g in games:
     winner_name = Player.get_by_id(g["winner_id"])  # Fetch player name by ID
     loser_name = Player.get_by_id(g["loser_id"])
     st.write(
-        f"{winner_name} defeated {loser_name} in {g['format']} format on {g['played_at']}"
+        f"{winner_name} defeated {loser_name} in {g['format']} format on {g['played_at'].date()}"
     )
 
 # --- Player Win Rates ---
