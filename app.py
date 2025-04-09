@@ -97,29 +97,31 @@ if history_edition != "All":
 
 # --- Head-to-Head Win Rates ---
 st.subheader(f"Head-to-Head Win Rates for {history_player_name}")
+opponent_stats = {}
 
-opponent_stats = Counter()
 for g in player_games:
     opponent_id = (
         g["loser_id"] if g["winner_id"] == history_player_id else g["winner_id"]
     )
     opponent_name = Player.get_by_id(opponent_id)
-    if g["winner_id"] == history_player_id:
-        opponent_stats[(opponent_name, "wins")] += 1
-    else:
-        opponent_stats[(opponent_name, "losses")] += 1
 
-# Now use the stats for your summary
+    if opponent_name not in opponent_stats:
+        opponent_stats[opponent_name] = {"wins": 0, "losses": 0}
+
+    if g["winner_id"] == history_player_id:
+        opponent_stats[opponent_name]["wins"] += 1
+    else:
+        opponent_stats[opponent_name]["losses"] += 1
+
 summary_data = []
 for opponent, record in opponent_stats.items():
-    opponent_name, result = opponent
-    wins = opponent_stats.get((opponent_name, "wins"), 0)
-    losses = opponent_stats.get((opponent_name, "losses"), 0)
+    wins = record["wins"]
+    losses = record["losses"]
     total = wins + losses
     win_rate = f"{(wins / total) * 100:.0f}%" if total > 0 else "—"
     summary_data.append(
         {
-            "Opponent": opponent_name,
+            "Opponent": opponent,
             "Wins": wins,
             "Losses": losses,
             "Win Rate": win_rate,
