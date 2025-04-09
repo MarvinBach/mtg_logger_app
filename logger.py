@@ -10,7 +10,7 @@ def add_player(name: str) -> str:
     player = Player(name=name)
     response = player.add()
 
-    if response.status_code != 201:
-        raise Exception(f"Supabase error: {response}")
+    if response.error:
+        raise Exception(f"Supabase error: {response.error}")
 
     return f"Player {name} added successfully!"

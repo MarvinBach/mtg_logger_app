@@ -143,7 +143,6 @@ plotter.plot_player_win_rates_by_color(
 # --- Add New Player ---
 st.header("Add new player")
 new_player = st.text_input("Player name")
-
 if st.button("Add Player"):
     try:
         message = add_player(new_player)
