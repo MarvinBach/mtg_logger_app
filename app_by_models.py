@@ -1,4 +1,5 @@
 import streamlit as st
+from datetime import datetime
 from models import Player, Game
 from plot_by_models import WinRatePlotter
 
@@ -64,8 +65,14 @@ games = Game.get_recent(limit=5)  # Using Game class to fetch recent games
 for g in games:
     winner_name = Player.get_by_id(g["winner_id"])  # Fetch player name by ID
     loser_name = Player.get_by_id(g["loser_id"])
+
+    if isinstance(g["played_at"], str):
+        played_at = datetime.fromisoformat(g["played_at"]).date()
+    else:
+        played_at = g["played_at"].date()
+
     st.write(
-        f"{winner_name} defeated {loser_name} in {g['format']} format on {g['played_at'].date()}"
+        f"{winner_name} defeated {loser_name} in {g['format']} format on {played_at}"
     )
 
 # --- Player Win Rates ---
