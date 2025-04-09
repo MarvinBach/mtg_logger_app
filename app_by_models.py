@@ -80,6 +80,47 @@ st.header("Player Win Rates")
 plotter = WinRatePlotter()
 plotter.plot_player_win_rates()
 
+# --- Player Match History ---
+st.header("Player Match History")
+history_player_name = st.selectbox(
+    "Select a player to view history", player_names, key="history_player"
+)
+history_format = st.selectbox(
+    "Filter by Format", ["All"] + FORMAT_OTPIONS, key="history_format"
+)
+history_edition = st.selectbox(
+    "Filter by Edition", ["All"] + EDITION_OPTIONS, key="history_edition"
+)
+history_player_id = player_map[history_player_name]
+player_games = Game.get_all_by_player(history_player_id)
+if history_format != "All":
+    player_games = [g for g in player_games if g["format"] == history_format]
+
+if history_edition != "All":
+    player_games = [g for g in player_games if g.get("edition") == history_edition]
+
+st.subheader(f"Games for {history_player_name}")
+if not player_games:
+    st.write("No games found.")
+else:
+    for g in player_games:
+        winner_name = Player.get_by_id(g["winner_id"])
+        loser_name = Player.get_by_id(g["loser_id"])
+        opponent = loser_name if g["winner_id"] == history_player_id else winner_name
+        outcome = "won against" if g["winner_id"] == history_player_id else "lost to"
+
+        if isinstance(g["played_at"], str):
+            played_at = datetime.fromisoformat(g["played_at"]).date()
+        else:
+            played_at = g["played_at"].date()
+
+        st.write(
+            f"{history_player_name} {outcome} {opponent} "
+            f"in {g['format']} format"
+            f"{' - ' + g['edition'] if g.get('edition') else ''} "
+            f"on {played_at}"
+        )
+
 # --- Player Win Rate by Color ---
 st.header("Player Win Rate by Color")
 selected_player_name = st.selectbox("Select Player", player_names)
@@ -92,7 +133,6 @@ selected_edition = st.selectbox("Select Edition (optional)", ["All"] + EDITION_O
 plotter.plot_player_win_rates_by_color(
     selected_player_name, selected_format, selected_edition
 )
-
 
 # --- Add New Player ---
 st.header("Add new player")

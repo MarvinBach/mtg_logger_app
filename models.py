@@ -90,3 +90,12 @@ class Game:
         if limit is not None:
             query = query.limit(limit)
         return query.execute().data
+
+    @staticmethod
+    def get_all_by_player(player_id):
+        """Get all games by player from the database"""
+        return [
+            g
+            for g in Game.get_all()
+            if g["winner_id"] == player_id or g["loser_id"] == player_id
+        ]
