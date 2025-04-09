@@ -1,6 +1,28 @@
 import streamlit as st
 import pandas as pd
-from db import get_player_by_id, get_players, get_recent_games
+from supabase import create_client
+
+supabase = create_client(st.secrets["SUPABASE_URL"], st.secrets["SUPABASE_KEY"])
+
+
+def get_players():
+    return supabase.table("players").select("*").execute().data
+
+
+def get_player_by_id(player_id):
+    response = (
+        supabase.table("players").select("name").eq("id", player_id).limit(1).execute()
+    )
+    if response.data:
+        return response.data[0]["name"]
+    return "Unknown"
+
+
+def get_recent_games(limit=None):
+    query = supabase.table("games").select("*").order("played_at", desc=True)
+    if limit is not None:
+        query = query.limit(limit)
+    return query.execute().data
 
 
 class WinRatePlotter:
