@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime
-from collections import Counter
 
 from constants import EDITION_OPTIONS, COLOR_OPTIONS, FORMAT_OPTIONS
 from models import Player, Game
