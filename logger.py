@@ -4,11 +4,7 @@ from models import Player, Game
 from constants import EDITION_OPTIONS, COLOR_OPTIONS
 
 
-def add_game() -> None:
-    players = Player.get_all()
-    player_map = {p["name"]: p["id"] for p in players}
-    player_names = list(player_map.keys())
-
+def add_game(player_map, player_names) -> None:
     if not player_names:
         st.warning("Add some players first!")
     else:

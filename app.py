@@ -12,7 +12,10 @@ st.title("Magic The Gathering Game Logger")
 
 # --- Add Game Result ---
 st.header("Add game result")
-add_game()
+players = Player.get_all()
+player_map = {p["name"]: p["id"] for p in players}
+player_names = list(player_map.keys())
+add_game(player_map, player_names)
 
 # --- Game History ---
 st.header("Game History")
