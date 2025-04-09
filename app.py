@@ -139,8 +139,11 @@ plotter.plot_player_win_rates_by_color(
 st.header("Add new player")
 new_player = st.text_input("Player name")
 if st.button("Add Player"):
-    try:
-        Player.add(name=new_player)
-        st.success(f"Player {new_player} added successfully!")
-    except Exception as e:
-        st.error(f"Failed to add player: {e}")
+    if not new_player.strip():
+        st.error("Player name cannot be empty.")
+    else:
+        try:
+            Player.add(name=new_player)
+            st.success(f"Player {new_player} added successfully!")
+        except Exception as e:
+            st.error(f"Failed to add player: {e}")
