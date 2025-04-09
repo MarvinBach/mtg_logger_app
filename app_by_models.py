@@ -116,8 +116,6 @@ for g in player_games:
         opponent_stats[opponent_name]["wins"] += 1
     else:
         opponent_stats[opponent_name]["losses"] += 1
-
-# Format into a DataFrame
 summary_data = []
 for opponent, record in opponent_stats.items():
     wins = record["wins"]

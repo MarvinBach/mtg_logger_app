@@ -101,7 +101,4 @@ class WinRatePlotter:
 
         df = pd.DataFrame(stats)
         st.subheader(f"Win Rates for {selected_player_name} by Color")
-        st.markdown(
-            f"**Filtered by**: Format = `{selected_format}`, Edition = `{selected_edition}`"
-        )
         st.dataframe(df)
