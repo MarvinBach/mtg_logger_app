@@ -94,6 +94,7 @@ history_edition = st.selectbox(
 )
 history_player_id = player_map[history_player_name]
 player_games = Game.get_all_by_player(history_player_id)
+
 if history_format != "All":
     player_games = [g for g in player_games if g["format"] == history_format]
 
@@ -140,6 +141,7 @@ else:
     df = pd.DataFrame(table_data)
     st.dataframe(df, use_container_width=True)
 
+# --- Head-to-Head Win Rates ---
 st.subheader(f"Head-to-Head Win Rates for {history_player_name}")
 from collections import defaultdict
 
@@ -178,16 +180,9 @@ else:
     st.write("No head-to-head data available.")
 
 # --- Player Win Rate by Color ---
-st.header("Player Win Rate by Color")
-selected_player_name = st.selectbox("Select Player", player_names)
-selected_format = st.selectbox(
-    "Select Format (optional)",
-    ["All", "Draft", "Sealed", "Cube Draft", "Constructed", "Commander"],
-)
-selected_edition = st.selectbox("Select Edition (optional)", ["All"] + EDITION_OPTIONS)
-
+st.subheader(f"Win Rate by Color for {history_player_name}")
 plotter.plot_player_win_rates_by_color(
-    selected_player_name, selected_format, selected_edition
+    history_player_name, history_format, history_edition
 )
 
 # --- Add New Player ---
