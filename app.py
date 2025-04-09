@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime
+from collections import Counter
 
 from constants import EDITION_OPTIONS, COLOR_OPTIONS, FORMAT_OTPIONS
 from models import Player, Game
@@ -96,28 +97,29 @@ if history_edition != "All":
 
 # --- Head-to-Head Win Rates ---
 st.subheader(f"Head-to-Head Win Rates for {history_player_name}")
-from collections import defaultdict
 
-opponent_stats = defaultdict(lambda: {"wins": 0, "losses": 0})
-
+opponent_stats = Counter()
 for g in player_games:
     opponent_id = (
         g["loser_id"] if g["winner_id"] == history_player_id else g["winner_id"]
     )
     opponent_name = Player.get_by_id(opponent_id)
     if g["winner_id"] == history_player_id:
-        opponent_stats[opponent_name]["wins"] += 1
+        opponent_stats[(opponent_name, "wins")] += 1
     else:
-        opponent_stats[opponent_name]["losses"] += 1
+        opponent_stats[(opponent_name, "losses")] += 1
+
+# Now use the stats for your summary
 summary_data = []
 for opponent, record in opponent_stats.items():
-    wins = record["wins"]
-    losses = record["losses"]
+    opponent_name, result = opponent
+    wins = opponent_stats.get((opponent_name, "wins"), 0)
+    losses = opponent_stats.get((opponent_name, "losses"), 0)
     total = wins + losses
     win_rate = f"{(wins / total) * 100:.0f}%" if total > 0 else "—"
     summary_data.append(
         {
-            "Opponent": opponent,
+            "Opponent": opponent_name,
             "Wins": wins,
             "Losses": losses,
             "Win Rate": win_rate,
