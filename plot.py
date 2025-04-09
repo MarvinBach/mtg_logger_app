@@ -99,9 +99,9 @@ class WinRatePlotter:
                 }
             )
 
+        st.subheader(f"Win Rates for {selected_player_name} by Color")
         if stats:
             df = pd.DataFrame(stats)
-            st.subheader(f"Win Rates for {selected_player_name} by Color")
             st.dataframe(df)
         else:
-            st.write("No head-to-head data available.")
+            st.write("No win rates by color data available.")
