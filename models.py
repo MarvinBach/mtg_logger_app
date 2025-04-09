@@ -99,11 +99,9 @@ class Game:
 
     @staticmethod
     def get_all_by_player(player_id):
-        """Get all games by player from the database."""
-        response = (
-            supabase.table("games")
-            .select("*")
-            .or_(f"winner_id.eq.{player_id},loser_id.eq.{player_id}")
-            .execute()
-        )
-        return response.data
+        """Get all games by player from the database"""
+        return [
+            g
+            for g in Game.get_all()
+            if g["winner_id"] == player_id or g["loser_id"] == player_id
+        ]
