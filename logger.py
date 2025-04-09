@@ -8,5 +8,9 @@ def add_player(name: str) -> str:
         raise ValueError("Player name cannot be empty.")
 
     player = Player(name=name)
-    _ = player.add()
+    response = player.add()
+
+    if not response or not getattr(response, "data", None):
+        raise Exception("Failed to add player.")
+
     return f"Player {name} added successfully!"
