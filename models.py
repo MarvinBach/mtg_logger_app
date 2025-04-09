@@ -99,7 +99,7 @@ class Game:
 
     @staticmethod
     def get_all_by_player(player_id):
-        """Get all games by player from the database"""
+        """Get all games by player from the database."""
         response = (
             supabase.table("games")
             .select("*")
