@@ -91,6 +91,12 @@ class Game:
             query = query.limit(limit)
         return query.execute().data
 
+    @classmethod
+    def get_all(cls):
+        """Get all games from the database."""
+        response = supabase.table("games").select("*").execute()
+        return response.data
+
     @staticmethod
     def get_all_by_player(player_id):
         """Get all games by player from the database"""
