@@ -1,6 +1,9 @@
 import streamlit as st
 import pandas as pd
+from collections import Counter
+
 from db import get_player_by_id, get_players, get_recent_games
+from models import Player
 
 
 class WinRatePlotter:
@@ -99,9 +102,46 @@ class WinRatePlotter:
                 }
             )
 
-        st.subheader(f"Win Rates for {selected_player_name} by Color")
         if stats:
             df = pd.DataFrame(stats)
             st.dataframe(df)
         else:
             st.write("No win rates by color data available.")
+
+
+def plot_head_to_head_win_rates(
+    history_player_name, player_games, history_player_id
+) -> None:
+    opponent_stats = Counter(history_player_name)
+    for g in player_games:
+        opponent_id = (
+            g["loser_id"] if g["winner_id"] == history_player_id else g["winner_id"]
+        )
+        opponent_name = Player.get_by_id(opponent_id)
+        if g["winner_id"] == history_player_id:
+            opponent_stats[(opponent_name, "wins")] += 1
+        else:
+            opponent_stats[(opponent_name, "losses")] += 1
+
+    # Now use the stats for your summary
+    summary_data = []
+    for opponent, record in opponent_stats.items():
+        opponent_name, result = opponent
+        wins = opponent_stats.get((opponent_name, "wins"), 0)
+        losses = opponent_stats.get((opponent_name, "losses"), 0)
+        total = wins + losses
+        win_rate = f"{(wins / total) * 100:.0f}%" if total > 0 else "—"
+        summary_data.append(
+            {
+                "Opponent": opponent_name,
+                "Wins": wins,
+                "Losses": losses,
+                "Win Rate": win_rate,
+            }
+        )
+
+    if summary_data:
+        summary_df = pd.DataFrame(summary_data).sort_values(by="Wins", ascending=False)
+        st.dataframe(summary_df, use_container_width=True)
+    else:
+        st.write("No head-to-head data available.")
