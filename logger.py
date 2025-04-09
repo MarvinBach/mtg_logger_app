@@ -1,15 +1,11 @@
-import streamlit as st
 from models import Player
 
 
-def add_new_player() -> None:
-    new_player = st.text_input("Player name")
-    if st.button("Add Player"):
-        if not new_player.strip():
-            st.error("Player name cannot be empty.")
-        else:
-            try:
-                Player.add(name=new_player)
-                st.success(f"Player {new_player} added successfully!")
-            except Exception as e:
-                st.error(f"Failed to add player: {e}")
+def add_player(name: str) -> str:
+    """Adds a new player to the database."""
+    name = name.strip()
+    if not name:
+        raise ValueError("Player name cannot be empty.")
+
+    Player.add(name=name)
+    return f"Player {name} added successfully!"

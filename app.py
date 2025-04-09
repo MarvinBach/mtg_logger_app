@@ -3,9 +3,9 @@ import pandas as pd
 from datetime import datetime
 
 from constants import EDITION_OPTIONS, COLOR_OPTIONS, FORMAT_OPTIONS
-from logger import add_new_player
 from models import Player, Game
 from plot import WinRatePlotter
+from logger import add_player
 
 
 st.title("Magic The Gathering Game Logger")
@@ -142,4 +142,13 @@ plotter.plot_player_win_rates_by_color(
 
 # --- Add New Player ---
 st.header("Add new player")
-add_new_player()
+new_player = st.text_input("Player name")
+
+if st.button("Add Player"):
+    try:
+        message = add_player(new_player)
+        st.success(message)
+    except ValueError as ve:
+        st.error(str(ve))
+    except Exception as e:
+        st.error(f"Failed to add player: {e}")
