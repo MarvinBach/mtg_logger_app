@@ -101,46 +101,6 @@ if history_format != "All":
 if history_edition != "All":
     player_games = [g for g in player_games if g.get("edition") == history_edition]
 
-st.subheader(f"Games for {history_player_name}")
-if not player_games:
-    st.write("No games found.")
-else:
-    table_data = []
-    for g in player_games:
-        winner_name = Player.get_by_id(g["winner_id"])
-        loser_name = Player.get_by_id(g["loser_id"])
-        opponent = loser_name if g["winner_id"] == history_player_id else winner_name
-        outcome = "Win" if g["winner_id"] == history_player_id else "Loss"
-
-        # Format date
-        if isinstance(g["played_at"], str):
-            played_at = datetime.fromisoformat(g["played_at"]).date()
-        else:
-            played_at = g["played_at"].date()
-
-        table_data.append(
-            {
-                "Date": played_at,
-                "Outcome": outcome,
-                "Opponent": opponent,
-                "Format": g["format"],
-                "Edition": g.get("edition") or "—",
-                "Player Colors": ", ".join(
-                    g["winner_colors"]
-                    if g["winner_id"] == history_player_id
-                    else g["loser_colors"]
-                ),
-                "Opponent Colors": ", ".join(
-                    g["loser_colors"]
-                    if g["winner_id"] == history_player_id
-                    else g["winner_colors"]
-                ),
-            }
-        )
-
-    df = pd.DataFrame(table_data)
-    st.dataframe(df, use_container_width=True)
-
 # --- Head-to-Head Win Rates ---
 st.subheader(f"Head-to-Head Win Rates for {history_player_name}")
 from collections import defaultdict
@@ -180,7 +140,6 @@ else:
     st.write("No head-to-head data available.")
 
 # --- Player Win Rate by Color ---
-st.subheader(f"Win Rate by Color for {history_player_name}")
 plotter.plot_player_win_rates_by_color(
     history_player_name, history_format, history_edition
 )
