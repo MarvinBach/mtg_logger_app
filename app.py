@@ -3,7 +3,7 @@ import pandas as pd
 from datetime import datetime
 from collections import Counter
 
-from constants import EDITION_OPTIONS, COLOR_OPTIONS, FORMAT_OTPIONS
+from constants import EDITION_OPTIONS, COLOR_OPTIONS, FORMAT_OPTIONS
 from models import Player, Game
 from plot import WinRatePlotter
 
@@ -81,7 +81,7 @@ history_player_name = st.selectbox(
     "Select a player to view history", player_names, key="history_player"
 )
 history_format = st.selectbox(
-    "Filter by Format", ["All"] + FORMAT_OTPIONS, key="history_format"
+    "Filter by Format", ["All"] + FORMAT_OPTIONS, key="history_format"
 )
 history_edition = st.selectbox(
     "Filter by Edition", ["All"] + EDITION_OPTIONS, key="history_edition"

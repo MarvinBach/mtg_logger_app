@@ -9,4 +9,4 @@ EDITION_OPTIONS = [
 
 COLOR_OPTIONS = ["Blue", "Green", "Red", "White", "Black"]
 
-FORMAT_OTPIONS = ["Draft", "Cube Draft", "Sealed", "Constructed", "Commander", "Arena"]
+FORMAT_OPTIONS = ["Draft", "Cube Draft", "Sealed", "Constructed", "Commander", "Arena"]
