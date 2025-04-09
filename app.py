@@ -1,21 +1,11 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime
+
+from constants import EDITION_OPTIONS, COLOR_OPTIONS, FORMAT_OTPIONS
 from models import Player, Game
 from plot import WinRatePlotter
 
-EDITION_OPTIONS = [
-    "Tarkir Dragonstorm",
-    "Aetherdrift",
-    "Innistrad Remastered",
-    "Foundations",
-    "Duskmourn",
-    "Outlaws of Thunder Junction",
-]
-
-COLOR_OPTIONS = ["Blue", "Green", "Red", "White", "Black"]
-
-FORMAT_OTPIONS = ["Draft", "Cube Draft", "Sealed", "Constructed", "Commander", "Arena"]
 
 st.title("Magic The Gathering Game Logger")
 
@@ -31,7 +21,7 @@ else:
     winner = st.selectbox("Winner", player_names, key="winner")
     loser = st.selectbox("Loser", player_names, key="loser")
     game_format = st.selectbox(
-        "Format", ["Draft", "Sealed", "Cube Draft", "Constructed", "Commander"]
+        "Format", ["Draft", "Sealed", "Cube Draft", "Constructed", "Commander", "Arena"]
     )
     selected_edition = st.selectbox(
         "Edition (optional)", options=["None"] + EDITION_OPTIONS, index=0
@@ -48,23 +38,26 @@ else:
             st.error("Winner and loser cannot be the same player.")
         else:
             edition_to_submit = selected_edition if selected_edition != "None" else None
-            Game.add(
-                winner_id=player_map[winner],
-                loser_id=player_map[loser],
-                game_format=game_format,
-                selected_edition=edition_to_submit,
-                winner_colors=winner_colors,
-                loser_colors=loser_colors,
-            )
-            st.success(
-                f"Game result added: {winner} defeated {loser} in {game_format} format!"
-            )
+            try:
+                Game(
+                    winner_id=player_map[winner],
+                    loser_id=player_map[loser],
+                    game_format=game_format,
+                    edition=edition_to_submit,
+                    winner_colors=winner_colors,
+                    loser_colors=loser_colors,
+                ).add()
+                st.success(
+                    f"Game result added: {winner} defeated {loser} in {game_format} format!"
+                )
+            except Exception as e:
+                st.error(f"Failed to add game: {e}")
 
 # --- Game History ---
 st.header("Game History")
-games = Game.get_recent(limit=5)  # Using Game class to fetch recent games
+games = Game.get_recent(limit=5)
 for g in games:
-    winner_name = Player.get_by_id(g["winner_id"])  # Fetch player name by ID
+    winner_name = Player.get_by_id(g["winner_id"])
     loser_name = Player.get_by_id(g["loser_id"])
 
     if isinstance(g["played_at"], str):
@@ -147,7 +140,7 @@ st.header("Add new player")
 new_player = st.text_input("Player name")
 if st.button("Add Player"):
     try:
-        Player.add(name=new_player)  # Add player using the class method
+        Player.add(name=new_player)
         st.success(f"Player {new_player} added successfully!")
     except Exception as e:
         st.error(f"Failed to add player: {e}")
