@@ -22,7 +22,16 @@ else:
     winner = st.selectbox("Winner", player_names, key="winner")
     loser = st.selectbox("Loser", player_names, key="loser")
     game_format = st.selectbox(
-        "Format", ["Draft", "Sealed", "Cube Draft", "Constructed", "Commander", "Arena"]
+        "Format",
+        [
+            "Draft",
+            "Sealed",
+            "Winston",
+            "Cube Draft",
+            "Constructed",
+            "Commander",
+            "Arena",
+        ],
     )
     selected_edition = st.selectbox(
         "Edition (optional)", options=["None"] + EDITION_OPTIONS, index=0
