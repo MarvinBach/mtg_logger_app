@@ -34,11 +34,8 @@ if player_names:
         key="player_details"
     )
 
-    # Player matchups
+    # Show player statistics
     visualizer.plot_player_matchups(selected_player)
-
-    # Color win rates
-    st.subheader(f"Win Rates by Color for {selected_player}")
     visualizer.plot_player_win_rates_by_color(selected_player)
 
 # Add new player
