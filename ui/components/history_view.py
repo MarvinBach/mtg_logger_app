@@ -1,14 +1,72 @@
 import streamlit as st
 from datetime import datetime
 from data.repositories import GameRepository, PlayerRepository
+from core.enums import GameFormat, Edition
 from .edit_game_form import edit_game_modal
+
+def filter_games(games, format_filter, edition_filter, player_filter, player_map):
+    """Filter games based on selected criteria"""
+    filtered_games = games
+
+    if format_filter != "All":
+        filtered_games = [g for g in filtered_games if g["format"] == format_filter]
+
+    if edition_filter != "All":
+        filtered_games = [g for g in filtered_games if g.get("edition") == edition_filter]
+
+    if player_filter != "All":
+        player_id = player_map[player_filter]
+        filtered_games = [
+            g for g in filtered_games
+            if g["winner_id"] == player_id or g["loser_id"] == player_id
+        ]
+
+    return filtered_games
 
 def render_game_history(limit: int = 5) -> None:
     """Render recent game history"""
     st.header("Game History")
 
+    # Get all data
     games = GameRepository.get_recent(limit=limit)
-    for game in games:
+    players = PlayerRepository.get_all()
+    player_map = {p["name"]: p["id"] for p in players}
+
+    # Filter options
+    st.subheader("Filter Options")
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        format_filter = st.selectbox(
+            "Format",
+            ["All"] + GameFormat.list(),
+            key="history_format_filter"
+        )
+
+    with col2:
+        edition_filter = st.selectbox(
+            "Edition",
+            ["All"] + Edition.list()[1:],
+            key="history_edition_filter"
+        )
+
+    with col3:
+        player_filter = st.selectbox(
+            "Player",
+            ["All"] + list(player_map.keys()),
+            key="history_player_filter"
+        )
+
+    # Apply filters
+    filtered_games = filter_games(games, format_filter, edition_filter, player_filter, player_map)
+
+    if not filtered_games:
+        st.info("No games found matching the selected filters.")
+        return
+
+    # Display filtered games
+    st.subheader(f"Showing {len(filtered_games)} games")
+    for game in filtered_games:
         # Create columns for game info and edit button
         col1, col2 = st.columns([0.85, 0.15])
 
