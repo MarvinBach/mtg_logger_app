@@ -53,6 +53,19 @@ class GameRepository:
         return response.data[0]
 
     @staticmethod
+    def update(game_id: int, game: Game) -> Dict[str, Any]:
+        """Update an existing game"""
+        game.validate()
+        config.logger.info(f"Updating game {game_id}: {game}")
+
+        game_data = game.to_dict()
+        response = config.db.table("games").update(game_data).eq("id", game_id).execute()
+
+        if not response.data:
+            raise Exception(f"Failed to update game with ID {game_id}")
+        return response.data[0]
+
+    @staticmethod
     def delete(game_id: int) -> None:
         config.logger.info(f"Deleting game with ID: {game_id}")
         response = config.db.table("games").delete().eq("id", game_id).execute()
@@ -75,3 +88,9 @@ class GameRepository:
         return config.db.table("games").select("*").or_(
             f"winner_id.eq.{player_id},loser_id.eq.{player_id}"
         ).execute().data
+
+    @staticmethod
+    def get_by_id(game_id: int) -> Optional[Dict[str, Any]]:
+        """Get a specific game by ID"""
+        response = config.db.table("games").select("*").eq("id", game_id).limit(1).execute()
+        return response.data[0] if response.data else None
