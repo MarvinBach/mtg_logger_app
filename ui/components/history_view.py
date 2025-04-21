@@ -3,6 +3,16 @@ from datetime import datetime, timedelta
 from data.repositories import GameRepository, PlayerRepository
 from core.enums import Edition
 from .edit_game_form import edit_game_modal
+from typing import List, Dict, Any
+
+@st.cache_data(ttl=60)  # Cache player data for 1 minute
+def get_cached_players() -> List[Dict[str, Any]]:
+    """Get cached list of players"""
+    try:
+        return PlayerRepository.get_all()
+    except Exception as e:
+        st.error(f"Failed to fetch players: {str(e)}")
+        return []
 
 def get_game_date(game):
     """Extract date from game's played_at field"""
@@ -16,59 +26,22 @@ def get_game_date(game):
         st.error(f"Error parsing date for game {game}: {str(e)}")
         return None
 
-def filter_games(games, start_date, end_date, edition_filter, player_filter, player_map):
-    """Filter games based on selected criteria"""
-    filtered_games = games
-
-    # Filter by date range
-    if start_date or end_date:
-        filtered_games = []
-        for game in games:
-            game_date = get_game_date(game)
-            if not game_date:
-                continue
-
-            if start_date and end_date:
-                if start_date <= game_date <= end_date:
-                    filtered_games.append(game)
-            elif start_date:
-                if game_date >= start_date:
-                    filtered_games.append(game)
-            elif end_date:
-                if game_date <= end_date:
-                    filtered_games.append(game)
-
-    if edition_filter != "All":
-        filtered_games = [g for g in filtered_games if g.get("edition") == edition_filter]
-
-    if player_filter != "All":
-        player_id = player_map[player_filter]
-        filtered_games = [
-            g for g in filtered_games
-            if g["winner_id"] == player_id or g["loser_id"] == player_id
-        ]
-
-    return filtered_games
-
 def render_game_history() -> None:
     """Render game history"""
     st.header("Game History")
 
-    # Get all data
-    all_games = GameRepository.get_all()
-    # Sort games by played_at in descending order (newest first)
-    all_games = sorted(all_games, key=lambda x: x["played_at"], reverse=True)
-
-    players = PlayerRepository.get_all()
+    # Get cached player data
+    players = get_cached_players()
     player_map = {p["name"]: p["id"] for p in players}
 
     # Filter and display options
     col1, col2, col3, col4, col5 = st.columns([1, 1, 1, 1, 0.7])
 
     with col1:
+        default_start = datetime.now().date() - timedelta(days=30)  # Last 30 days by default
         start_date = st.date_input(
             "From Date",
-            value=None,
+            value=default_start,
             key="history_start_date",
             help="Start date (inclusive)"
         )
@@ -76,7 +49,7 @@ def render_game_history() -> None:
     with col2:
         end_date = st.date_input(
             "To Date",
-            value=None,
+            value=datetime.now().date(),  # Today by default
             key="history_end_date",
             help="End date (inclusive)"
         )
@@ -95,29 +68,35 @@ def render_game_history() -> None:
             key="history_player_filter"
         )
 
-    # First apply all filters
-    filtered_games = filter_games(all_games, start_date, end_date, edition_filter, player_filter, player_map)
-
-    # Then let user choose how many of the filtered games to display
+    # Then let user choose how many games to display
     with col5:
         display_limit = st.number_input(
             "Show games",
             min_value=1,
-            max_value=max(len(filtered_games), 1),  # At least 1, or number of filtered games
-            value=min(5, len(filtered_games)),  # Default to 5 or all filtered games if less
+            max_value=100,  # Reasonable maximum
+            value=5,  # Default to 5 games
             step=5,
             key="history_limit"
         )
+
+    # Get filtered games directly from database
+    player_id = player_map[player_filter] if player_filter != "All" else None
+    filtered_games = GameRepository.get_filtered_games(
+        start_date=start_date,
+        end_date=end_date,
+        edition_filter=edition_filter,
+        player_id=player_id,
+        limit=display_limit
+    )
 
     if not filtered_games:
         st.info("No games found matching the selected filters.")
         return
 
-    # Display only the selected number of filtered games (already sorted newest first)
-    games_to_display = filtered_games[:display_limit]
-    st.caption(f"Showing {len(games_to_display)} of {len(filtered_games)} filtered games")
+    # Display games
+    st.caption(f"Showing {len(filtered_games)} games")
 
-    for game in games_to_display:
+    for game in filtered_games:
         # Create columns for game info and edit button
         col1, col2 = st.columns([0.85, 0.15])
 
