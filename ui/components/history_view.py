@@ -8,12 +8,21 @@ def get_game_date(game):
     """Extract date from game's played_at field"""
     try:
         if not game.get("played_at"):
+            st.debug(f"No played_at field in game: {game}")
             return None
 
-        if isinstance(game["played_at"], str):
-            return datetime.fromisoformat(game["played_at"]).date()
-        return game["played_at"].date()
-    except (ValueError, AttributeError):
+        played_at = game["played_at"]
+        st.debug(f"Original played_at value: {played_at} (type: {type(played_at)})")
+
+        if isinstance(played_at, str):
+            result = datetime.fromisoformat(played_at).date()
+        else:
+            result = played_at.date()
+
+        st.debug(f"Extracted date: {result}")
+        return result
+    except (ValueError, AttributeError) as e:
+        st.error(f"Error parsing date for game {game}: {str(e)}")
         return None
 
 def filter_games(games, start_date, end_date, edition_filter, player_filter, player_map):
@@ -22,15 +31,20 @@ def filter_games(games, start_date, end_date, edition_filter, player_filter, pla
 
     # Filter by date range
     if start_date or end_date:
+        st.debug(f"Filtering by date range: {start_date} to {end_date}")
         filtered_games = []
         for game in games:
             game_date = get_game_date(game)
             if not game_date:
                 continue
 
+            st.debug(f"Comparing game date {game_date} with range {start_date} - {end_date}")
             if start_date and end_date:
                 if start_date <= game_date <= end_date:
+                    st.debug(f"Game date {game_date} is within range")
                     filtered_games.append(game)
+                else:
+                    st.debug(f"Game date {game_date} is outside range")
             elif start_date:
                 if game_date >= start_date:
                     filtered_games.append(game)
@@ -38,8 +52,11 @@ def filter_games(games, start_date, end_date, edition_filter, player_filter, pla
                 if game_date <= end_date:
                     filtered_games.append(game)
 
+    st.debug(f"After date filtering: {len(filtered_games)} games")
+
     if edition_filter != "All":
         filtered_games = [g for g in filtered_games if g.get("edition") == edition_filter]
+        st.debug(f"After edition filtering: {len(filtered_games)} games")
 
     if player_filter != "All":
         player_id = player_map[player_filter]
@@ -47,6 +64,7 @@ def filter_games(games, start_date, end_date, edition_filter, player_filter, pla
             g for g in filtered_games
             if g["winner_id"] == player_id or g["loser_id"] == player_id
         ]
+        st.debug(f"After player filtering: {len(filtered_games)} games")
 
     return filtered_games
 
@@ -68,6 +86,8 @@ def render_game_history(limit: int = 5) -> None:
             key="history_start_date",
             help="Start date (inclusive)"
         )
+        if start_date:
+            st.debug(f"Selected start date: {start_date} (type: {type(start_date)})")
 
     with col2:
         end_date = st.date_input(
@@ -76,6 +96,8 @@ def render_game_history(limit: int = 5) -> None:
             key="history_end_date",
             help="End date (inclusive)"
         )
+        if end_date:
+            st.debug(f"Selected end date: {end_date} (type: {type(end_date)})")
 
     with col3:
         edition_filter = st.selectbox(
@@ -103,6 +125,7 @@ def render_game_history(limit: int = 5) -> None:
 
     # Get filtered games with selected limit
     games = GameRepository.get_recent(limit=display_limit)
+    st.debug(f"Retrieved {len(games)} recent games")
     filtered_games = filter_games(games, start_date, end_date, edition_filter, player_filter, player_map)
 
     if not filtered_games:
