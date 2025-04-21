@@ -28,13 +28,11 @@ def render_game_history(limit: int = 5) -> None:
     st.header("Game History")
 
     # Get all data
-    games = GameRepository.get_recent(limit=limit)
     players = PlayerRepository.get_all()
     player_map = {p["name"]: p["id"] for p in players}
 
-    # Filter options
-    st.subheader("Filter Options")
-    col1, col2, col3 = st.columns(3)
+    # Filter and display options
+    col1, col2, col3, col4 = st.columns([1, 1, 1, 0.7])
 
     with col1:
         format_filter = st.selectbox(
@@ -57,7 +55,18 @@ def render_game_history(limit: int = 5) -> None:
             key="history_player_filter"
         )
 
-    # Apply filters
+    with col4:
+        display_limit = st.number_input(
+            "Show games",
+            min_value=1,
+            max_value=100,
+            value=5,
+            step=5,
+            key="history_limit"
+        )
+
+    # Get filtered games with selected limit
+    games = GameRepository.get_recent(limit=display_limit)
     filtered_games = filter_games(games, format_filter, edition_filter, player_filter, player_map)
 
     if not filtered_games:
@@ -65,7 +74,7 @@ def render_game_history(limit: int = 5) -> None:
         return
 
     # Display filtered games
-    st.subheader(f"Showing {len(filtered_games)} games")
+    st.caption(f"Showing {len(filtered_games)} games")
     for game in filtered_games:
         # Create columns for game info and edit button
         col1, col2 = st.columns([0.85, 0.15])
