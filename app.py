@@ -5,6 +5,7 @@ from visualization.visualizer import DataVisualizer
 from ui.components.game_form import render_game_form
 from ui.components.history_view import render_game_history
 from data.repositories import PlayerRepository
+from core.enums import Edition
 
 st.title("Magic The Gathering Game Logger")
 
@@ -17,7 +18,7 @@ visualizer = DataVisualizer(stats_calculator)
 render_game_form()
 
 # Render game history
-render_game_history(limit=5)
+render_game_history()
 
 # Player statistics
 st.header("Player Statistics")
@@ -28,15 +29,53 @@ players = PlayerRepository.get_all()
 player_names = [p["name"] for p in players]
 
 if player_names:
-    selected_player = st.selectbox(
-        "Select a player to view details",
-        player_names,
-        key="player_details"
+    # Player selection and filters
+    col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
+
+    with col1:
+        selected_player = st.selectbox(
+            "Select a player",
+            player_names,
+            key="player_details"
+        )
+
+    with col2:
+        start_date = st.date_input(
+            "From Date",
+            value=None,
+            key="stats_start_date",
+            help="Start date (inclusive)"
+        )
+
+    with col3:
+        end_date = st.date_input(
+            "To Date",
+            value=None,
+            key="stats_end_date",
+            help="End date (inclusive)"
+        )
+
+    with col4:
+        edition_filter = st.selectbox(
+            "Edition",
+            ["All"] + Edition.list()[1:],
+            key="stats_edition_filter"
+        )
+
+    # Show filtered player statistics
+    visualizer.plot_player_matchups(
+        selected_player,
+        start_date=start_date,
+        end_date=end_date,
+        edition_filter=edition_filter
     )
 
-    # Show player statistics
-    visualizer.plot_player_matchups(selected_player)
-    visualizer.plot_player_win_rates_by_color(selected_player)
+    visualizer.plot_player_win_rates_by_color(
+        selected_player,
+        start_date=start_date,
+        end_date=end_date,
+        edition_filter=edition_filter
+    )
 
 # Add new player
 st.header("Add new player")

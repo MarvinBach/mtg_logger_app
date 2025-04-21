@@ -8,19 +8,10 @@ def get_game_date(game):
     """Extract date from game's played_at field"""
     try:
         if not game.get("played_at"):
-            st.debug(f"No played_at field in game: {game}")
             return None
 
         played_at = game["played_at"]
-        st.debug(f"Original played_at value: {played_at} (type: {type(played_at)})")
-
-        if isinstance(played_at, str):
-            result = datetime.fromisoformat(played_at).date()
-        else:
-            result = played_at.date()
-
-        st.debug(f"Extracted date: {result}")
-        return result
+        return datetime.fromisoformat(played_at).date() if isinstance(played_at, str) else played_at.date()
     except (ValueError, AttributeError) as e:
         st.error(f"Error parsing date for game {game}: {str(e)}")
         return None
@@ -28,23 +19,25 @@ def get_game_date(game):
 def filter_games(games, start_date, end_date, edition_filter, player_filter, player_map):
     """Filter games based on selected criteria"""
     filtered_games = games
+    debug_info = []
 
     # Filter by date range
     if start_date or end_date:
-        st.debug(f"Filtering by date range: {start_date} to {end_date}")
+        debug_info.append(f"Filtering by date range: {start_date} to {end_date}")
         filtered_games = []
         for game in games:
             game_date = get_game_date(game)
             if not game_date:
                 continue
 
-            st.debug(f"Comparing game date {game_date} with range {start_date} - {end_date}")
+            debug_info.append(f"Game: {game.get('played_at')} → parsed date: {game_date}")
+
             if start_date and end_date:
                 if start_date <= game_date <= end_date:
-                    st.debug(f"Game date {game_date} is within range")
+                    debug_info.append(f"✓ Game date {game_date} is within range")
                     filtered_games.append(game)
                 else:
-                    st.debug(f"Game date {game_date} is outside range")
+                    debug_info.append(f"✗ Game date {game_date} is outside range")
             elif start_date:
                 if game_date >= start_date:
                     filtered_games.append(game)
@@ -52,11 +45,11 @@ def filter_games(games, start_date, end_date, edition_filter, player_filter, pla
                 if game_date <= end_date:
                     filtered_games.append(game)
 
-    st.debug(f"After date filtering: {len(filtered_games)} games")
+    debug_info.append(f"After date filtering: {len(filtered_games)} games")
 
     if edition_filter != "All":
         filtered_games = [g for g in filtered_games if g.get("edition") == edition_filter]
-        st.debug(f"After edition filtering: {len(filtered_games)} games")
+        debug_info.append(f"After edition filtering: {len(filtered_games)} games")
 
     if player_filter != "All":
         player_id = player_map[player_filter]
@@ -64,15 +57,16 @@ def filter_games(games, start_date, end_date, edition_filter, player_filter, pla
             g for g in filtered_games
             if g["winner_id"] == player_id or g["loser_id"] == player_id
         ]
-        st.debug(f"After player filtering: {len(filtered_games)} games")
+        debug_info.append(f"After player filtering: {len(filtered_games)} games")
 
-    return filtered_games
+    return filtered_games, debug_info
 
-def render_game_history(limit: int = 5) -> None:
-    """Render recent game history"""
+def render_game_history() -> None:
+    """Render game history"""
     st.header("Game History")
 
     # Get all data
+    all_games = GameRepository.get_all()  # Get all games first
     players = PlayerRepository.get_all()
     player_map = {p["name"]: p["id"] for p in players}
 
@@ -86,8 +80,6 @@ def render_game_history(limit: int = 5) -> None:
             key="history_start_date",
             help="Start date (inclusive)"
         )
-        if start_date:
-            st.debug(f"Selected start date: {start_date} (type: {type(start_date)})")
 
     with col2:
         end_date = st.date_input(
@@ -96,8 +88,6 @@ def render_game_history(limit: int = 5) -> None:
             key="history_end_date",
             help="End date (inclusive)"
         )
-        if end_date:
-            st.debug(f"Selected end date: {end_date} (type: {type(end_date)})")
 
     with col3:
         edition_filter = st.selectbox(
@@ -113,28 +103,36 @@ def render_game_history(limit: int = 5) -> None:
             key="history_player_filter"
         )
 
+    # First apply all filters
+    filtered_games, debug_info = filter_games(all_games, start_date, end_date, edition_filter, player_filter, player_map)
+
+    # Then let user choose how many of the filtered games to display
     with col5:
         display_limit = st.number_input(
             "Show games",
             min_value=1,
-            max_value=100,
-            value=5,
+            max_value=max(len(filtered_games), 1),  # At least 1, or number of filtered games
+            value=min(50, len(filtered_games)),  # Default to 50 or all filtered games if less
             step=5,
             key="history_limit"
         )
 
-    # Get filtered games with selected limit
-    games = GameRepository.get_recent(limit=display_limit)
-    st.debug(f"Retrieved {len(games)} recent games")
-    filtered_games = filter_games(games, start_date, end_date, edition_filter, player_filter, player_map)
+    # Debug information in expander
+    with st.expander("Debug Information"):
+        st.write(f"Total games in database: {len(all_games)}")
+        st.write(f"Games after filtering: {len(filtered_games)}")
+        for info in debug_info:
+            st.write(info)
 
     if not filtered_games:
         st.info("No games found matching the selected filters.")
         return
 
-    # Display filtered games
-    st.caption(f"Showing {len(filtered_games)} games")
-    for game in filtered_games:
+    # Display only the selected number of most recent filtered games
+    games_to_display = filtered_games[:display_limit]
+    st.caption(f"Showing {len(games_to_display)} of {len(filtered_games)} filtered games")
+
+    for game in games_to_display:
         # Create columns for game info and edit button
         col1, col2 = st.columns([0.85, 0.15])
 
