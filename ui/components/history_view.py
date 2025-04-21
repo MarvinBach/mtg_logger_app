@@ -4,17 +4,39 @@ from data.repositories import GameRepository, PlayerRepository
 from core.enums import Edition
 from .edit_game_form import edit_game_modal
 
+def get_game_date(game):
+    """Extract date from game's played_at field"""
+    try:
+        if not game.get("played_at"):
+            return None
+
+        if isinstance(game["played_at"], str):
+            return datetime.fromisoformat(game["played_at"]).date()
+        return game["played_at"].date()
+    except (ValueError, AttributeError):
+        return None
+
 def filter_games(games, start_date, end_date, edition_filter, player_filter, player_map):
     """Filter games based on selected criteria"""
     filtered_games = games
 
     # Filter by date range
     if start_date or end_date:
-        filtered_games = [
-            g for g in filtered_games
-            if (not start_date or datetime.fromisoformat(g["played_at"]).date() >= start_date)
-            and (not end_date or datetime.fromisoformat(g["played_at"]).date() <= end_date)
-        ]
+        filtered_games = []
+        for game in games:
+            game_date = get_game_date(game)
+            if not game_date:
+                continue
+
+            if start_date and end_date:
+                if start_date <= game_date <= end_date:
+                    filtered_games.append(game)
+            elif start_date:
+                if game_date >= start_date:
+                    filtered_games.append(game)
+            elif end_date:
+                if game_date <= end_date:
+                    filtered_games.append(game)
 
     if edition_filter != "All":
         filtered_games = [g for g in filtered_games if g.get("edition") == edition_filter]
@@ -43,14 +65,16 @@ def render_game_history(limit: int = 5) -> None:
         start_date = st.date_input(
             "From Date",
             value=None,
-            key="history_start_date"
+            key="history_start_date",
+            help="Start date (inclusive)"
         )
 
     with col2:
         end_date = st.date_input(
             "To Date",
             value=None,
-            key="history_end_date"
+            key="history_end_date",
+            help="End date (inclusive)"
         )
 
     with col3:
