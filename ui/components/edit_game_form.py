@@ -41,11 +41,16 @@ def render_edit_game_form(game_data: Dict[str, Any]) -> None:
         key=f"edit_format_{game_data['id']}"
     )
 
+    # Handle edition selection
+    editions = ["None"] + Edition.list()[1:]  # All editions except NONE
     current_edition = game_data.get("edition", "None")
+    if current_edition is None:
+        current_edition = "None"
+
     selected_edition = st.selectbox(
         "Edition (optional)",
-        options=["None"] + Edition.list()[1:],
-        index=(["None"] + Edition.list()[1:]).index(current_edition),
+        options=editions,
+        index=editions.index(current_edition),
         key=f"edit_edition_{game_data['id']}"
     )
 
@@ -65,7 +70,17 @@ def render_edit_game_form(game_data: Dict[str, Any]) -> None:
         key=f"edit_loser_colors_{game_data['id']}"
     )
 
-    if st.button("Save Changes", key=f"save_{game_data['id']}"):
+    col1, col2 = st.columns([0.5, 0.5])
+    with col1:
+        save_button = st.button("Save Changes", key=f"save_{game_data['id']}")
+    with col2:
+        cancel_button = st.button("Cancel", key=f"cancel_{game_data['id']}")
+
+    if cancel_button:
+        del st.session_state[f"editing_game_{game_data['id']}"]
+        st.rerun()
+
+    if save_button:
         if winner == loser:
             st.error("Winner and loser cannot be the same player.")
             return
@@ -86,6 +101,7 @@ def render_edit_game_form(game_data: Dict[str, Any]) -> None:
             # Update in database
             GameRepository.update(game_data["id"], game)
             st.success("Game updated successfully!")
+            del st.session_state[f"editing_game_{game_data['id']}"]
             st.rerun()  # Refresh the page to show updated data
 
         except Exception as e:
@@ -99,6 +115,3 @@ def edit_game_modal(game_data: Dict[str, Any]) -> None:
     if st.session_state.get(f"editing_game_{game_data['id']}", False):
         with st.expander("Edit Game", expanded=True):
             render_edit_game_form(game_data)
-            if st.button("Cancel", key=f"cancel_{game_data['id']}"):
-                del st.session_state[f"editing_game_{game_data['id']}"]
-                st.rerun()
