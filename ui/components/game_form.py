@@ -3,6 +3,7 @@ from typing import List, Dict
 from core.enums import GameFormat, Color, Edition
 from core.models import Game
 from data.repositories import GameRepository, PlayerRepository
+from datetime import datetime
 
 def render_game_form() -> None:
     """Render the game input form"""
@@ -52,7 +53,8 @@ def render_game_form() -> None:
                 game_format=GameFormat(game_format),
                 winner_colors=[Color(c) for c in winner_colors],
                 loser_colors=[Color(c) for c in loser_colors],
-                edition=Edition(selected_edition) if selected_edition != "None" else None
+                edition=Edition(selected_edition) if selected_edition != "None" else None,
+                played_at=datetime.now()  # Set current date and time
             )
             GameRepository.add(game)
             st.success(
