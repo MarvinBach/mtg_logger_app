@@ -1,15 +1,20 @@
 import streamlit as st
-from datetime import datetime
+from datetime import datetime, timedelta
 from data.repositories import GameRepository, PlayerRepository
-from core.enums import GameFormat, Edition
+from core.enums import Edition
 from .edit_game_form import edit_game_modal
 
-def filter_games(games, format_filter, edition_filter, player_filter, player_map):
+def filter_games(games, start_date, end_date, edition_filter, player_filter, player_map):
     """Filter games based on selected criteria"""
     filtered_games = games
 
-    if format_filter != "All":
-        filtered_games = [g for g in filtered_games if g["format"] == format_filter]
+    # Filter by date range
+    if start_date or end_date:
+        filtered_games = [
+            g for g in filtered_games
+            if (not start_date or datetime.fromisoformat(g["played_at"]).date() >= start_date)
+            and (not end_date or datetime.fromisoformat(g["played_at"]).date() <= end_date)
+        ]
 
     if edition_filter != "All":
         filtered_games = [g for g in filtered_games if g.get("edition") == edition_filter]
@@ -32,30 +37,37 @@ def render_game_history(limit: int = 5) -> None:
     player_map = {p["name"]: p["id"] for p in players}
 
     # Filter and display options
-    col1, col2, col3, col4 = st.columns([1, 1, 1, 0.7])
+    col1, col2, col3, col4, col5 = st.columns([1, 1, 1, 1, 0.7])
 
     with col1:
-        format_filter = st.selectbox(
-            "Format",
-            ["All"] + GameFormat.list(),
-            key="history_format_filter"
+        start_date = st.date_input(
+            "From Date",
+            value=None,
+            key="history_start_date"
         )
 
     with col2:
+        end_date = st.date_input(
+            "To Date",
+            value=None,
+            key="history_end_date"
+        )
+
+    with col3:
         edition_filter = st.selectbox(
             "Edition",
             ["All"] + Edition.list()[1:],
             key="history_edition_filter"
         )
 
-    with col3:
+    with col4:
         player_filter = st.selectbox(
             "Player",
             ["All"] + list(player_map.keys()),
             key="history_player_filter"
         )
 
-    with col4:
+    with col5:
         display_limit = st.number_input(
             "Show games",
             min_value=1,
@@ -67,7 +79,7 @@ def render_game_history(limit: int = 5) -> None:
 
     # Get filtered games with selected limit
     games = GameRepository.get_recent(limit=display_limit)
-    filtered_games = filter_games(games, format_filter, edition_filter, player_filter, player_map)
+    filtered_games = filter_games(games, start_date, end_date, edition_filter, player_filter, player_map)
 
     if not filtered_games:
         st.info("No games found matching the selected filters.")
