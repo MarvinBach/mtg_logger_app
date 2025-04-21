@@ -7,7 +7,9 @@ class GameFormat(Enum):
     SEALED = "Sealed"
     CONSTRUCTED = "Constructed"
     COMMANDER = "Commander"
-    ARENA = "Arena"
+    WINSTON_DRAFT = "Winston Draft"
+    JUMP_IN = "Jump In"
+    BOOSTER_WAR = "Booster War"
 
     @classmethod
     def list(cls) -> list[str]:
