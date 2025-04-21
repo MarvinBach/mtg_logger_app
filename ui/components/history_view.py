@@ -19,25 +19,18 @@ def get_game_date(game):
 def filter_games(games, start_date, end_date, edition_filter, player_filter, player_map):
     """Filter games based on selected criteria"""
     filtered_games = games
-    debug_info = []
 
     # Filter by date range
     if start_date or end_date:
-        debug_info.append(f"Filtering by date range: {start_date} to {end_date}")
         filtered_games = []
         for game in games:
             game_date = get_game_date(game)
             if not game_date:
                 continue
 
-            debug_info.append(f"Game: {game.get('played_at')} → parsed date: {game_date}")
-
             if start_date and end_date:
                 if start_date <= game_date <= end_date:
-                    debug_info.append(f"✓ Game date {game_date} is within range")
                     filtered_games.append(game)
-                else:
-                    debug_info.append(f"✗ Game date {game_date} is outside range")
             elif start_date:
                 if game_date >= start_date:
                     filtered_games.append(game)
@@ -45,11 +38,8 @@ def filter_games(games, start_date, end_date, edition_filter, player_filter, pla
                 if game_date <= end_date:
                     filtered_games.append(game)
 
-    debug_info.append(f"After date filtering: {len(filtered_games)} games")
-
     if edition_filter != "All":
         filtered_games = [g for g in filtered_games if g.get("edition") == edition_filter]
-        debug_info.append(f"After edition filtering: {len(filtered_games)} games")
 
     if player_filter != "All":
         player_id = player_map[player_filter]
@@ -57,16 +47,18 @@ def filter_games(games, start_date, end_date, edition_filter, player_filter, pla
             g for g in filtered_games
             if g["winner_id"] == player_id or g["loser_id"] == player_id
         ]
-        debug_info.append(f"After player filtering: {len(filtered_games)} games")
 
-    return filtered_games, debug_info
+    return filtered_games
 
 def render_game_history() -> None:
     """Render game history"""
     st.header("Game History")
 
     # Get all data
-    all_games = GameRepository.get_all()  # Get all games first
+    all_games = GameRepository.get_all()
+    # Sort games by played_at in descending order (newest first)
+    all_games = sorted(all_games, key=lambda x: x["played_at"], reverse=True)
+
     players = PlayerRepository.get_all()
     player_map = {p["name"]: p["id"] for p in players}
 
@@ -104,7 +96,7 @@ def render_game_history() -> None:
         )
 
     # First apply all filters
-    filtered_games, debug_info = filter_games(all_games, start_date, end_date, edition_filter, player_filter, player_map)
+    filtered_games = filter_games(all_games, start_date, end_date, edition_filter, player_filter, player_map)
 
     # Then let user choose how many of the filtered games to display
     with col5:
@@ -112,23 +104,16 @@ def render_game_history() -> None:
             "Show games",
             min_value=1,
             max_value=max(len(filtered_games), 1),  # At least 1, or number of filtered games
-            value=min(50, len(filtered_games)),  # Default to 50 or all filtered games if less
+            value=min(5, len(filtered_games)),  # Default to 5 or all filtered games if less
             step=5,
             key="history_limit"
         )
-
-    # Debug information in expander
-    with st.expander("Debug Information"):
-        st.write(f"Total games in database: {len(all_games)}")
-        st.write(f"Games after filtering: {len(filtered_games)}")
-        for info in debug_info:
-            st.write(info)
 
     if not filtered_games:
         st.info("No games found matching the selected filters.")
         return
 
-    # Display only the selected number of most recent filtered games
+    # Display only the selected number of filtered games (already sorted newest first)
     games_to_display = filtered_games[:display_limit]
     st.caption(f"Showing {len(games_to_display)} of {len(filtered_games)} filtered games")
 

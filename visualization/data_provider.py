@@ -1,30 +1,24 @@
 from typing import List, Dict, Any, Optional
 from config.config import config
+from data.repositories import GameRepository, PlayerRepository
 
 class DataProvider:
     """Provides data for visualization"""
-    @staticmethod
-    def get_players() -> List[Dict[str, Any]]:
-        response = config.db.table("players").select("*").execute()
-        return response.data
+    def get_games(self) -> List[Dict[str, Any]]:
+        """Get all games"""
+        return GameRepository.get_all()
 
-    @staticmethod
-    def get_player_by_id(player_id: int) -> Optional[str]:
-        response = (
-            config.db.table("players")
-            .select("name")
-            .eq("id", player_id)
-            .limit(1)
-            .execute()
-        )
-        return response.data[0]["name"] if response.data else None
+    def get_recent_games(self, limit: int = 100) -> List[Dict[str, Any]]:
+        """Get recent games with limit"""
+        return GameRepository.get_recent(limit=limit)
 
-    @staticmethod
-    def get_recent_games(limit: Optional[int] = None) -> List[Dict[str, Any]]:
-        query = config.db.table("games").select("*").order("played_at", desc=True)
-        if limit is not None:
-            query = query.limit(limit)
-        return query.execute().data
+    def get_players(self) -> List[Dict[str, Any]]:
+        """Get all players"""
+        return PlayerRepository.get_all()
+
+    def get_player_by_id(self, player_id: int) -> str:
+        """Get player name by ID"""
+        return PlayerRepository.get_by_id(player_id)
 
     @staticmethod
     def get_player_games(player_id: int) -> List[Dict[str, Any]]:

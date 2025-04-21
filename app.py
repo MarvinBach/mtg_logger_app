@@ -17,65 +17,74 @@ visualizer = DataVisualizer(stats_calculator)
 # Render game form
 render_game_form()
 
-# Render game history
+# Render game history with its own filters
 render_game_history()
 
-# Player statistics
+# Player statistics section
 st.header("Player Statistics")
+
+# Overall win rates (always show all games)
 visualizer.plot_player_win_rates()
 
-# Player details
+# Player details with separate filters
 players = PlayerRepository.get_all()
 player_names = [p["name"] for p in players]
 
 if player_names:
-    # Player selection and filters
-    col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
+    st.subheader("Player Details")
+
+    # Player selection and filters in two rows
+    col1, col2 = st.columns(2)
 
     with col1:
         selected_player = st.selectbox(
             "Select a player",
             player_names,
-            key="player_details"
+            key="stats_player_select"
         )
 
-    with col2:
-        start_date = st.date_input(
-            "From Date",
-            value=None,
-            key="stats_start_date",
-            help="Start date (inclusive)"
-        )
+    # Filters in a separate container for visual separation
+    with st.container():
+        filter_col1, filter_col2, filter_col3 = st.columns(3)
 
-    with col3:
-        end_date = st.date_input(
-            "To Date",
-            value=None,
-            key="stats_end_date",
-            help="End date (inclusive)"
-        )
+        with filter_col1:
+            stats_start_date = st.date_input(
+                "Stats From Date",
+                value=None,
+                key="stats_start_date",
+                help="Start date for player statistics (inclusive)"
+            )
 
-    with col4:
-        edition_filter = st.selectbox(
-            "Edition",
-            ["All"] + Edition.list()[1:],
-            key="stats_edition_filter"
-        )
+        with filter_col2:
+            stats_end_date = st.date_input(
+                "Stats To Date",
+                value=None,
+                key="stats_end_date",
+                help="End date for player statistics (inclusive)"
+            )
+
+        with filter_col3:
+            stats_edition = st.selectbox(
+                "Stats Edition",
+                ["All"] + Edition.list()[1:],
+                key="stats_edition"
+            )
 
     # Show filtered player statistics
-    visualizer.plot_player_matchups(
-        selected_player,
-        start_date=start_date,
-        end_date=end_date,
-        edition_filter=edition_filter
-    )
+    if selected_player:
+        visualizer.plot_player_matchups(
+            selected_player,
+            start_date=stats_start_date,
+            end_date=stats_end_date,
+            edition_filter=stats_edition
+        )
 
-    visualizer.plot_player_win_rates_by_color(
-        selected_player,
-        start_date=start_date,
-        end_date=end_date,
-        edition_filter=edition_filter
-    )
+        visualizer.plot_player_win_rates_by_color(
+            selected_player,
+            start_date=stats_start_date,
+            end_date=stats_end_date,
+            edition_filter=stats_edition
+        )
 
 # Add new player
 st.header("Add new player")

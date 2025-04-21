@@ -7,15 +7,16 @@ class StatsCalculator:
     """Calculates statistics from game data"""
     def __init__(self, data_provider: DataProvider):
         self.data_provider = data_provider
-        self.games = self.data_provider.get_recent_games()
+        self.games = self.data_provider.get_recent_games(limit=5)
         self.players = self.data_provider.get_players()
 
     def calculate_player_win_rates(self) -> pd.DataFrame:
-        """Calculate win rates for all players"""
+        """Calculate win rates for all players using all games in database"""
+        games = self.data_provider.get_games()  # Get ALL games
         win_counts: Dict[int, int] = {}
         loss_counts: Dict[int, int] = {}
 
-        for game in self.games:
+        for game in games:
             winner_id = game["winner_id"]
             loser_id = game["loser_id"]
             win_counts[winner_id] = win_counts.get(winner_id, 0) + 1
