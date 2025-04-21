@@ -37,6 +37,50 @@ class StatsCalculator:
 
         return pd.DataFrame(stats).sort_values(by="Win Rate (%)", ascending=False)
 
+    def calculate_player_matchups(self, player_name: str) -> Optional[pd.DataFrame]:
+        """Calculate win rates against other players"""
+        player_map = {p["name"]: p["id"] for p in self.players}
+        player_id = player_map.get(player_name)
+
+        if not player_id:
+            return None
+
+        # Track wins and losses against each opponent
+        matchups: Dict[int, Dict[str, int]] = {}
+
+        for game in self.games:
+            if game["winner_id"] == player_id:
+                opponent_id = game["loser_id"]
+                if opponent_id not in matchups:
+                    matchups[opponent_id] = {"wins": 0, "losses": 0}
+                matchups[opponent_id]["wins"] += 1
+            elif game["loser_id"] == player_id:
+                opponent_id = game["winner_id"]
+                if opponent_id not in matchups:
+                    matchups[opponent_id] = {"wins": 0, "losses": 0}
+                matchups[opponent_id]["losses"] += 1
+
+        if not matchups:
+            return None
+
+        # Create statistics for each matchup
+        stats = []
+        for opponent_id, record in matchups.items():
+            opponent_name = self.data_provider.get_player_by_id(opponent_id)
+            wins = record["wins"]
+            losses = record["losses"]
+            total = wins + losses
+            win_rate = round((wins / total) * 100, 2) if total > 0 else 0
+            stats.append({
+                "Opponent": opponent_name,
+                "Wins": wins,
+                "Losses": losses,
+                "Total Games": total,
+                "Win Rate (%)": win_rate,
+            })
+
+        return pd.DataFrame(stats).sort_values(by="Win Rate (%)", ascending=False)
+
     def calculate_color_win_rates(
         self,
         player_name: str,

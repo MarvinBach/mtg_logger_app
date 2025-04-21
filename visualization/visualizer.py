@@ -11,6 +11,15 @@ class DataVisualizer:
         df = self.stats_calculator.calculate_player_win_rates()
         st.dataframe(df, use_container_width=True)
 
+    def plot_player_matchups(self, player_name: str) -> None:
+        """Display win rates against other players"""
+        df = self.stats_calculator.calculate_player_matchups(player_name)
+        if df is not None:
+            st.subheader(f"Win Rates against Other Players")
+            st.dataframe(df, use_container_width=True)
+        else:
+            st.write("No matchup data available.")
+
     def plot_player_win_rates_by_color(
         self,
         player_name: str,
