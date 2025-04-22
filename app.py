@@ -1,7 +1,5 @@
 import streamlit as st
-from visualization.data_provider import DataProvider
-from visualization.stats_calculator import StatsCalculator
-from visualization.visualizer import DataVisualizer
+from visualization import DataProvider, StatsCalculator, DataVisualizer
 from ui.components.game_form import render_game_form
 from ui.components.history_view import render_game_history
 from data.repositories import PlayerRepository
