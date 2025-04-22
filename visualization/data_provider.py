@@ -1,7 +1,6 @@
 from typing import List, Dict, Any, Optional
 import streamlit as st
 from config.config import config
-from data.repositories import GameRepository, PlayerRepository
 
 class DataProvider:
     """Provides data for visualization"""
@@ -9,22 +8,26 @@ class DataProvider:
     @st.cache_data(ttl=60)  # Cache for 1 minute
     def get_games(_self) -> List[Dict[str, Any]]:
         """Get all games"""
-        return GameRepository.get_all()
+        return config.db.table("games").select("*").execute().data
 
     @st.cache_data(ttl=60)  # Cache for 1 minute
     def get_recent_games(_self, limit: int = 100) -> List[Dict[str, Any]]:
         """Get recent games with limit"""
-        return GameRepository.get_recent(limit=limit)
+        query = config.db.table("games").select("*").order("played_at", desc=True)
+        if limit is not None:
+            query = query.limit(limit)
+        return query.execute().data
 
     @st.cache_data(ttl=60)  # Cache for 1 minute
     def get_players(_self) -> List[Dict[str, Any]]:
         """Get all players"""
-        return PlayerRepository.get_all()
+        return config.db.table("players").select("*").execute().data
 
     @st.cache_data(ttl=60)  # Cache for 1 minute
-    def get_player_by_id(_self, player_id: int) -> str:
+    def get_player_by_id(_self, player_id: int) -> Optional[str]:
         """Get player name by ID"""
-        return PlayerRepository.get_by_id(player_id)
+        response = config.db.table("players").select("name").eq("id", player_id).limit(1).execute()
+        return response.data[0]["name"] if response.data else None
 
     @staticmethod
     @st.cache_data(ttl=60)  # Cache for 1 minute
