@@ -39,7 +39,7 @@ class StatsCalculator:
 
         return pd.DataFrame(stats).sort_values(by="Win Rate (%)", ascending=False)
 
-    def calculate_player_matchups(self, player_name: str, start_date=None, end_date=None, edition_filter="All"):
+    def calculate_player_matchups(self, player_name: str, start_date=None, end_date=None, edition_filter="All", format_filter="All"):
         """Calculate win rates against other players"""
         # Get all games for the player
         all_games = self.data_provider.get_games()  # Get ALL games instead of just recent ones
@@ -52,7 +52,7 @@ class StatsCalculator:
         ]
 
         if not player_games:
-            return pd.DataFrame()
+            return pd.DataFrame(columns=["Opponent", "Win Rate", "Total Games"])
 
         # Apply date filter if specified
         if start_date:
@@ -63,6 +63,10 @@ class StatsCalculator:
         # Apply edition filter if specified
         if edition_filter != "All":
             player_games = [g for g in player_games if g["edition"] == edition_filter]
+
+        # Apply format filter if specified
+        if format_filter != "All":
+            player_games = [g for g in player_games if g["format"] == format_filter]
 
         # Calculate matchup statistics
         matchups = {}
@@ -79,7 +83,7 @@ class StatsCalculator:
 
         # Convert to DataFrame
         if not matchups:
-            return pd.DataFrame()
+            return pd.DataFrame(columns=["Opponent", "Win Rate", "Total Games"])
 
         df = pd.DataFrame([
             {
@@ -90,7 +94,7 @@ class StatsCalculator:
             for opp, stats in matchups.items()
         ])
 
-        return df.sort_values("Win Rate", ascending=False)
+        return df.sort_values("Win Rate", ascending=False) if not df.empty else df
 
     def calculate_color_win_rates(
         self,
@@ -145,18 +149,18 @@ class StatsCalculator:
 
         return pd.DataFrame(stats)
 
-    def calculate_player_color_stats(self, player_name: str, start_date=None, end_date=None, edition_filter="All"):
+    def calculate_player_color_stats(self, player_name: str, start_date=None, end_date=None, edition_filter="All", format_filter="All"):
         """Calculate win rates by color combination with filters"""
         games = self.data_provider.get_games()
         players = self.data_provider.get_players()
 
         if not games or not players:
-            return pd.DataFrame()
+            return pd.DataFrame(columns=["Colors", "Win Rate", "Total Games"])
 
         # Get player ID
         player = next((p for p in players if p["name"] == player_name), None)
         if not player:
-            return pd.DataFrame()
+            return pd.DataFrame(columns=["Colors", "Win Rate", "Total Games"])
 
         # Filter games and collect color statistics
         color_stats = {}
@@ -177,6 +181,10 @@ class StatsCalculator:
 
             # Apply edition filter if specified
             if edition_filter != "All" and game.get("edition") != edition_filter:
+                continue
+
+            # Apply format filter if specified
+            if format_filter != "All" and game.get("format") != format_filter:
                 continue
 
             # Get player's colors for this game
@@ -200,4 +208,5 @@ class StatsCalculator:
                     "Total Games": data["total"]
                 })
 
-        return pd.DataFrame(stats).sort_values("Win Rate", ascending=False)
+        df = pd.DataFrame(stats)
+        return df.sort_values("Win Rate", ascending=False) if not df.empty else df

@@ -1,7 +1,7 @@
 import streamlit as st
 from datetime import datetime, timedelta
 from data.repositories import GameRepository, PlayerRepository
-from core.enums import Edition
+from core.enums import Edition, GameFormat
 from .edit_game_form import edit_game_modal
 from typing import List, Dict, Any
 
@@ -35,7 +35,7 @@ def render_game_history() -> None:
     player_map = {p["name"]: p["id"] for p in players}
 
     # Filter and display options
-    col1, col2, col3, col4, col5 = st.columns([1, 1, 1, 1, 0.7])
+    col1, col2, col3, col4, col5, col6 = st.columns([1, 1, 1, 1, 1, 0.7])
 
     with col1:
         default_start = datetime.now().date() - timedelta(days=30)  # Last 30 days by default
@@ -62,14 +62,21 @@ def render_game_history() -> None:
         )
 
     with col4:
+        format_filter = st.selectbox(
+            "Format",
+            ["All"] + GameFormat.list(),  # Include all formats
+            key="history_format_filter"
+        )
+
+    with col5:
         player_filter = st.selectbox(
             "Player",
-            ["All"] + list(player_map.keys()),
+            ["All"] + sorted(list(player_map.keys())),  # Sort player names alphabetically
             key="history_player_filter"
         )
 
     # Then let user choose how many games to display
-    with col5:
+    with col6:
         display_limit = st.number_input(
             "Show games",
             min_value=1,
@@ -85,6 +92,7 @@ def render_game_history() -> None:
         start_date=start_date,
         end_date=end_date,
         edition_filter=edition_filter,
+        format_filter=format_filter,
         player_id=player_id,
         limit=display_limit
     )

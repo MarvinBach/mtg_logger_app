@@ -106,6 +106,7 @@ class GameRepository:
         start_date=None,
         end_date=None,
         edition_filter="All",
+        format_filter="All",
         player_id=None,
         limit=None
     ) -> List[Dict[str, Any]]:
@@ -121,6 +122,8 @@ class GameRepository:
                     query = query.lt("played_at", next_day.isoformat())
                 if edition_filter != "All":
                     query = query.eq("edition", edition_filter)
+                if format_filter != "All":
+                    query = query.eq("format", format_filter)
                 return query
 
             # If player filter is active, combine winner and loser games

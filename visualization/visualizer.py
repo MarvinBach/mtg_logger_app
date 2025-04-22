@@ -22,10 +22,10 @@ class DataVisualizer:
             use_container_width=True
         )
 
-    def plot_player_matchups(self, player_name: str, start_date=None, end_date=None, edition_filter="All"):
+    def plot_player_matchups(self, player_name: str, start_date=None, end_date=None, edition_filter="All", format_filter="All"):
         """Display player matchup statistics"""
         df = self.stats_calculator.calculate_player_matchups(
-            player_name, start_date, end_date, edition_filter
+            player_name, start_date, end_date, edition_filter, format_filter
         )
 
         if df.empty:
@@ -46,7 +46,7 @@ class DataVisualizer:
             hide_index=True
         )
 
-    def plot_player_win_rates_by_color(self, player_name: str, start_date=None, end_date=None, edition_filter="All") -> None:
+    def plot_player_win_rates_by_color(self, player_name: str, start_date=None, end_date=None, edition_filter="All", format_filter="All") -> None:
         """Display win rates by color for a selected player"""
         st.subheader(f"Win Rates by Color - {player_name}")
 
@@ -54,7 +54,8 @@ class DataVisualizer:
             player_name,
             start_date=start_date,
             end_date=end_date,
-            edition_filter=edition_filter
+            edition_filter=edition_filter,
+            format_filter=format_filter
         )
 
         if color_stats.empty:

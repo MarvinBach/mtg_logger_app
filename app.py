@@ -3,7 +3,7 @@ from visualization import DataProvider, StatsCalculator, DataVisualizer
 from ui.components.game_form import render_game_form
 from ui.components.history_view import render_game_history
 from data.repositories import PlayerRepository
-from core.enums import Edition
+from core.enums import Edition, GameFormat
 
 st.title("Magic The Gathering Game Logger")
 
@@ -43,7 +43,7 @@ if player_names:
 
     # Filters in a separate container for visual separation
     with st.container():
-        filter_col1, filter_col2, filter_col3 = st.columns(3)
+        filter_col1, filter_col2, filter_col3, filter_col4 = st.columns(4)
 
         with filter_col1:
             stats_start_date = st.date_input(
@@ -68,20 +68,29 @@ if player_names:
                 key="stats_edition"
             )
 
+        with filter_col4:
+            stats_format = st.selectbox(
+                "Stats Format",
+                ["All"] + GameFormat.list(),  # Include all formats
+                key="stats_format"
+            )
+
     # Show filtered player statistics
     if selected_player:
         visualizer.plot_player_matchups(
             selected_player,
             start_date=stats_start_date,
             end_date=stats_end_date,
-            edition_filter=stats_edition
+            edition_filter=stats_edition,
+            format_filter=stats_format
         )
 
         visualizer.plot_player_win_rates_by_color(
             selected_player,
             start_date=stats_start_date,
             end_date=stats_end_date,
-            edition_filter=stats_edition
+            edition_filter=stats_edition,
+            format_filter=stats_format
         )
 
 # Add new player
