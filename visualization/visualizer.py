@@ -22,27 +22,28 @@ class DataVisualizer:
             use_container_width=True
         )
 
-    def plot_player_matchups(self, player_name: str, start_date=None, end_date=None, edition_filter="All") -> None:
-        """Display win rates against other players"""
-        st.subheader(f"Win Rates Against Other Players - {player_name}")
-
-        matchups = self.stats_calculator.calculate_player_matchups(
-            player_name,
-            start_date=start_date,
-            end_date=end_date,
-            edition_filter=edition_filter
+    def plot_player_matchups(self, player_name: str, start_date=None, end_date=None, edition_filter="All"):
+        """Display player matchup statistics"""
+        df = self.stats_calculator.calculate_player_matchups(
+            player_name, start_date, end_date, edition_filter
         )
 
-        if matchups.empty:
-            st.info(f"No games found for {player_name} with the current filters.")
+        if df.empty:
+            st.write("No games found for the selected filters.")
             return
 
+        # Format win rates as percentages
+        df["Win Rate"] = df["Win Rate"].apply(lambda x: f"{x*100:.1f}%")
+
+        # Display the dataframe
         st.dataframe(
-            matchups.style.format({
-                "Win Rate (%)": "{:.1f}%",
-                "Total Games": "{:}"
-            }),
-            use_container_width=True
+            df,
+            column_config={
+                "Opponent": st.column_config.TextColumn("Opponent"),
+                "Win Rate": st.column_config.TextColumn("Win Rate"),
+                "Total Games": st.column_config.NumberColumn("Total Games", format="%d")
+            },
+            hide_index=True
         )
 
     def plot_player_win_rates_by_color(self, player_name: str, start_date=None, end_date=None, edition_filter="All") -> None:

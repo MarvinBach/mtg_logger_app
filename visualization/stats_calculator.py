@@ -40,62 +40,57 @@ class StatsCalculator:
         return pd.DataFrame(stats).sort_values(by="Win Rate (%)", ascending=False)
 
     def calculate_player_matchups(self, player_name: str, start_date=None, end_date=None, edition_filter="All"):
-        """Calculate win rates against other players with filters"""
-        games = self.data_provider.get_games()
-        players = self.data_provider.get_players()
+        """Calculate win rates against other players"""
+        # Get all games for the player
+        all_games = self.data_provider.get_games()  # Get ALL games instead of just recent ones
+        player_games = [
+            game for game in all_games
+            if player_name in [
+                self.data_provider.get_player_by_id(game["winner_id"]),
+                self.data_provider.get_player_by_id(game["loser_id"])
+            ]
+        ]
 
-        if not games or not players:
+        if not player_games:
             return pd.DataFrame()
 
-        # Get player ID
-        player = next((p for p in players if p["name"] == player_name), None)
-        if not player:
-            return pd.DataFrame()
+        # Apply date filter if specified
+        if start_date:
+            player_games = [g for g in player_games if datetime.fromisoformat(g["played_at"]).date() >= start_date]
+        if end_date:
+            player_games = [g for g in player_games if datetime.fromisoformat(g["played_at"]).date() <= end_date]
 
-        # Filter games by date range and edition
-        filtered_games = []
-        for game in games:
-            # Check if game involves the player
-            if game["winner_id"] != player["id"] and game["loser_id"] != player["id"]:
-                continue
-
-            # Apply date filter if specified
-            if start_date or end_date:
-                game_date = datetime.fromisoformat(game["played_at"]).date()
-                if start_date and game_date < start_date:
-                    continue
-                if end_date and game_date > end_date:
-                    continue
-
-            # Apply edition filter if specified
-            if edition_filter != "All" and game.get("edition") != edition_filter:
-                continue
-
-            filtered_games.append(game)
+        # Apply edition filter if specified
+        if edition_filter != "All":
+            player_games = [g for g in player_games if g["edition"] == edition_filter]
 
         # Calculate matchup statistics
         matchups = {}
-        for game in filtered_games:
-            opponent_id = game["loser_id"] if game["winner_id"] == player["id"] else game["winner_id"]
-            opponent = next(p for p in players if p["id"] == opponent_id)
+        for game in player_games:
+            winner = self.data_provider.get_player_by_id(game["winner_id"])
+            loser = self.data_provider.get_player_by_id(game["loser_id"])
+            opponent = loser if winner == player_name else winner
 
-            if opponent["name"] not in matchups:
-                matchups[opponent["name"]] = {"wins": 0, "total": 0}
-
-            matchups[opponent["name"]]["total"] += 1
-            if game["winner_id"] == player["id"]:
-                matchups[opponent["name"]]["wins"] += 1
+            if opponent not in matchups:
+                matchups[opponent] = {"wins": 0, "total": 0}
+            matchups[opponent]["total"] += 1
+            if winner == player_name:
+                matchups[opponent]["wins"] += 1
 
         # Convert to DataFrame
-        stats = []
-        for opponent, data in matchups.items():
-            stats.append({
-                "Opponent": opponent,
-                "Win Rate": data["wins"] / data["total"],
-                "Total Games": data["total"]
-            })
+        if not matchups:
+            return pd.DataFrame()
 
-        return pd.DataFrame(stats).sort_values("Win Rate", ascending=False)
+        df = pd.DataFrame([
+            {
+                "Opponent": opp,
+                "Win Rate": stats["wins"] / stats["total"],
+                "Total Games": stats["total"]
+            }
+            for opp, stats in matchups.items()
+        ])
+
+        return df.sort_values("Win Rate", ascending=False)
 
     def calculate_color_win_rates(
         self,

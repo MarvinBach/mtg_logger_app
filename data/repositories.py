@@ -111,28 +111,39 @@ class GameRepository:
     ) -> List[Dict[str, Any]]:
         """Get games with filters applied at database level"""
         try:
-            query = config.db.table("games").select("*")
+            # Build base query with common filters
+            def apply_common_filters(query):
+                if start_date:
+                    query = query.gte("played_at", start_date.isoformat())
+                if end_date:
+                    # Add one day to include the end date fully
+                    next_day = end_date + timedelta(days=1)
+                    query = query.lt("played_at", next_day.isoformat())
+                if edition_filter != "All":
+                    query = query.eq("edition", edition_filter)
+                return query
 
-            # Apply date filters
-            if start_date:
-                query = query.gte("played_at", start_date.isoformat())
-            if end_date:
-                # Add one day to include the end date fully
-                next_day = end_date + timedelta(days=1)
-                query = query.lt("played_at", next_day.isoformat())
-
-            # Apply edition filter
-            if edition_filter != "All":
-                query = query.eq("edition", edition_filter)
-
-            # Apply player filter
+            # If player filter is active, combine winner and loser games
             if player_id:
-                query = query.or_(f"winner_id.eq.{player_id},loser_id.eq.{player_id}")
+                # Get games where player is winner
+                winner_query = config.db.table("games").select("*")
+                winner_query = apply_common_filters(winner_query)
+                winner_games = winner_query.eq("winner_id", player_id).execute().data
 
-            # Always sort by date descending (newest first)
+                # Get games where player is loser
+                loser_query = config.db.table("games").select("*")
+                loser_query = apply_common_filters(loser_query)
+                loser_games = loser_query.eq("loser_id", player_id).execute().data
+
+                # Combine and sort the results
+                all_games = winner_games + loser_games
+                all_games.sort(key=lambda x: x["played_at"], reverse=True)
+                return all_games[:limit] if limit else all_games
+
+            # If no player filter, use single query with all filters
+            query = config.db.table("games").select("*")
+            query = apply_common_filters(query)
             query = query.order("played_at", desc=True)
-
-            # Apply limit if specified
             if limit:
                 query = query.limit(limit)
 
