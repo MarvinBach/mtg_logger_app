@@ -44,10 +44,36 @@ class DataVisualizer:
         )
 
     def plot_player_win_rates_by_color(self, player_name: str, start_date=None, end_date=None, edition_filter="All", format_filter="All") -> None:
-        """Display win rates by color for a selected player"""
-        st.subheader(f"Win Rates by Color - {player_name}")
+        """Display win rates by color combination for a selected player"""
+        st.subheader(f"Win Rates by Color Combination - {player_name}")
+        st.caption("Shows statistics for each unique combination of colors played")
 
         color_stats = self.stats_calculator.calculate_player_color_stats(
+            player_name,
+            start_date=start_date,
+            end_date=end_date,
+            edition_filter=edition_filter,
+            format_filter=format_filter
+        )
+
+        if color_stats.empty:
+            st.info(f"No games found for {player_name} with the current filters.")
+            return
+
+        st.dataframe(
+            color_stats.style.format({
+                "Win Rate (%)": "{:.1f}%",
+                "Total Games": "{:}"
+            }),
+            use_container_width=True
+        )
+
+    def plot_player_individual_color_stats(self, player_name: str, start_date=None, end_date=None, edition_filter="All", format_filter="All") -> None:
+        """Display win rates by individual colors for a selected player"""
+        st.subheader(f"Win Rates by Individual Color - {player_name}")
+        st.caption("Each color is counted separately when playing multi-color decks")
+
+        color_stats = self.stats_calculator.calculate_player_individual_color_stats(
             player_name,
             start_date=start_date,
             end_date=end_date,

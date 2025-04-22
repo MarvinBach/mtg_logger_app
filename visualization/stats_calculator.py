@@ -107,12 +107,12 @@ class StatsCalculator:
         players = self.data_provider.get_players()
 
         if not games or not players:
-            return pd.DataFrame(columns=["Colors", "Win Rate (%)", "Total Games"])
+            return pd.DataFrame(columns=["Colors", "Wins", "Losses", "Total Games", "Win Rate (%)"])
 
         # Get player ID
         player = next((p for p in players if p["name"] == player_name), None)
         if not player:
-            return pd.DataFrame(columns=["Colors", "Win Rate (%)", "Total Games"])
+            return pd.DataFrame(columns=["Colors", "Wins", "Losses", "Total Games", "Win Rate (%)"])
 
         # Filter games and collect color statistics
         color_stats = {}
@@ -158,6 +158,80 @@ class StatsCalculator:
             win_rate = round((wins / total) * 100, 2) if total > 0 else 0
             stats.append({
                 "Colors": colors,
+                "Wins": wins,
+                "Losses": total - wins,
+                "Total Games": total,
+                "Win Rate (%)": win_rate,
+            })
+
+        df = pd.DataFrame(stats)
+        return df.sort_values("Win Rate (%)", ascending=False) if not df.empty else df
+
+    def calculate_player_individual_color_stats(self, player_name: str, start_date=None, end_date=None, edition_filter="All", format_filter="All"):
+        """Calculate win rates by individual colors (counting each color in multi-color decks)"""
+        games = self.data_provider.get_games()
+        players = self.data_provider.get_players()
+
+        if not games or not players:
+            return pd.DataFrame(columns=["Color", "Wins", "Losses", "Total Games", "Win Rate (%)"])
+
+        # Get player ID
+        player = next((p for p in players if p["name"] == player_name), None)
+        if not player:
+            return pd.DataFrame(columns=["Color", "Wins", "Losses", "Total Games", "Win Rate (%)"])
+
+        # Filter games and collect individual color statistics
+        color_stats = {}
+        for game in games:
+            # Check if game involves the player
+            is_winner = game["winner_id"] == player["id"]
+            is_loser = game["loser_id"] == player["id"]
+            if not (is_winner or is_loser):
+                continue
+
+            # Apply date filter if specified
+            if start_date or end_date:
+                game_date = datetime.fromisoformat(game["played_at"]).date()
+                if start_date and game_date < start_date:
+                    continue
+                if end_date and game_date > end_date:
+                    continue
+
+            # Apply edition filter if specified
+            if edition_filter != "All" and game.get("edition") != edition_filter:
+                continue
+
+            # Apply format filter if specified
+            if format_filter != "All" and game.get("format") != format_filter:
+                continue
+
+            # Get player's colors for this game
+            colors = game["winner_colors"] if is_winner else game["loser_colors"]
+
+            # Count each color individually
+            for color in colors:
+                if color not in color_stats:
+                    color_stats[color] = {"wins": 0, "total": 0}
+                color_stats[color]["total"] += 1
+                if is_winner:
+                    color_stats[color]["wins"] += 1
+
+            # Add "Colorless" only if no colors were present
+            if not colors:
+                if "Colorless" not in color_stats:
+                    color_stats["Colorless"] = {"wins": 0, "total": 0}
+                color_stats["Colorless"]["total"] += 1
+                if is_winner:
+                    color_stats["Colorless"]["wins"] += 1
+
+        # Convert to DataFrame
+        stats = []
+        for color, data in color_stats.items():
+            total = data["total"]
+            wins = data["wins"]
+            win_rate = round((wins / total) * 100, 2) if total > 0 else 0
+            stats.append({
+                "Color": color,
                 "Wins": wins,
                 "Losses": total - wins,
                 "Total Games": total,

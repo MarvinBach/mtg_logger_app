@@ -93,6 +93,14 @@ if player_names:
             format_filter=stats_format
         )
 
+        visualizer.plot_player_individual_color_stats(
+            selected_player,
+            start_date=stats_start_date,
+            end_date=stats_end_date,
+            edition_filter=stats_edition,
+            format_filter=stats_format
+        )
+
 # Add new player
 st.header("Add new player")
 new_player_name = st.text_input("Player name")
