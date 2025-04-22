@@ -24,6 +24,8 @@ class DataVisualizer:
 
     def plot_player_matchups(self, player_name: str, start_date=None, end_date=None, edition_filter="All", format_filter="All"):
         """Display player matchup statistics"""
+        st.subheader(f"Matchup Statistics - {player_name}")
+
         df = self.stats_calculator.calculate_player_matchups(
             player_name, start_date, end_date, edition_filter, format_filter
         )
