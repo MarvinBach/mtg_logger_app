@@ -28,7 +28,7 @@ visualizer.plot_player_win_rates()
 
 # Player details with separate filters
 players = PlayerRepository.get_all()
-player_names = [p["name"] for p in players]
+player_names = sorted([p["name"] for p in players])  # Sort player names alphabetically
 
 if player_names:
     st.subheader("Player Details")

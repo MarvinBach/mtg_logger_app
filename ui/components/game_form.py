@@ -12,7 +12,7 @@ def render_game_form() -> None:
     # Get players
     players = PlayerRepository.get_all()
     player_map = {p["name"]: p["id"] for p in players}
-    player_names = list(player_map.keys())
+    player_names = sorted(list(player_map.keys()))  # Sort player names alphabetically
 
     if not player_names:
         st.warning("Add some players first!")
