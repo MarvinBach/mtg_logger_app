@@ -12,6 +12,7 @@ class Config:
     """Central configuration class"""
     _instance: Optional['Config'] = None
     _db_client = None
+    _logger = None
 
     def __new__(cls):
         if cls._instance is None:
@@ -20,11 +21,18 @@ class Config:
         return cls._instance
 
     def _setup_logging(self):
-        logging.basicConfig(
-            level=logging.INFO,
-            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-        )
-        self.logger = logging.getLogger('mtg_logger')
+        if self._logger is None:
+            logging.basicConfig(
+                level=logging.INFO,
+                format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+            )
+            self._logger = logging.getLogger('mtg_logger')
+
+    @property
+    def logger(self):
+        if self._logger is None:
+            self._setup_logging()
+        return self._logger
 
     @property
     def db(self):
@@ -44,4 +52,5 @@ class Config:
                 raise
         return self._db_client
 
+# Create the singleton instance
 config = Config()
