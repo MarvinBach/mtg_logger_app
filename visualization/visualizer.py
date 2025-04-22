@@ -31,21 +31,16 @@ class DataVisualizer:
         )
 
         if df.empty:
-            st.write("No games found for the selected filters.")
+            st.info(f"No games found for {player_name} with the current filters.")
             return
 
-        # Format win rates as percentages
-        df["Win Rate"] = df["Win Rate"].apply(lambda x: f"{x*100:.1f}%")
-
-        # Display the dataframe
+        # Display the dataframe with consistent formatting
         st.dataframe(
-            df,
-            column_config={
-                "Opponent": st.column_config.TextColumn("Opponent"),
-                "Win Rate": st.column_config.TextColumn("Win Rate"),
-                "Total Games": st.column_config.NumberColumn("Total Games", format="%d")
-            },
-            hide_index=True
+            df.style.format({
+                "Win Rate (%)": "{:.1f}%",
+                "Total Games": "{:}"
+            }),
+            use_container_width=True
         )
 
     def plot_player_win_rates_by_color(self, player_name: str, start_date=None, end_date=None, edition_filter="All", format_filter="All") -> None:

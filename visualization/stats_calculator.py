@@ -51,7 +51,7 @@ class StatsCalculator:
         ]
 
         if not player_games:
-            return pd.DataFrame(columns=["Opponent", "Win Rate", "Total Games"])
+            return pd.DataFrame(columns=["Opponent", "Wins", "Losses", "Total Games", "Win Rate (%)"])
 
         # Apply date filter if specified
         if start_date:
@@ -82,18 +82,24 @@ class StatsCalculator:
 
         # Convert to DataFrame
         if not matchups:
-            return pd.DataFrame(columns=["Opponent", "Win Rate", "Total Games"])
+            return pd.DataFrame(columns=["Opponent", "Wins", "Losses", "Total Games", "Win Rate (%)"])
 
-        df = pd.DataFrame([
-            {
+        stats = []
+        for opp, data in matchups.items():
+            total = data["total"]
+            wins = data["wins"]
+            losses = total - wins
+            win_rate = round((wins / total) * 100, 2) if total > 0 else 0
+            stats.append({
                 "Opponent": opp,
-                "Win Rate": stats["wins"] / stats["total"],
-                "Total Games": stats["total"]
-            }
-            for opp, stats in matchups.items()
-        ])
+                "Wins": wins,
+                "Losses": losses,
+                "Total Games": total,
+                "Win Rate (%)": win_rate,
+            })
 
-        return df.sort_values("Win Rate", ascending=False) if not df.empty else df
+        df = pd.DataFrame(stats)
+        return df.sort_values("Win Rate (%)", ascending=False) if not df.empty else df
 
     def calculate_player_color_stats(self, player_name: str, start_date=None, end_date=None, edition_filter="All", format_filter="All"):
         """Calculate win rates by color combination with filters"""
