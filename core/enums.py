@@ -36,6 +36,7 @@ class Edition(Enum):
     FOUNDATIONS = "Foundations"
     DUSKMOURN = "Duskmourn"
     OUTLAWS = "Outlaws of Thunder Junction"
+    LOTR = "Lord of the Rings"
 
     @classmethod
     def list(cls) -> list[str]:
