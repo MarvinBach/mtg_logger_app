@@ -70,15 +70,35 @@ def render_edit_game_form(game_data: Dict[str, Any]) -> None:
         key=f"edit_loser_colors_{game_data['id']}"
     )
 
+    # Replace the 3-column button layout with 2 columns for main actions
     col1, col2 = st.columns([0.5, 0.5])
     with col1:
         save_button = st.button("Save Changes", key=f"save_{game_data['id']}")
     with col2:
         cancel_button = st.button("Cancel", key=f"cancel_{game_data['id']}")
 
+    # Add delete button in a separate section below with warning coloring
+    st.markdown("---")  # Visual separator
+    delete_button = st.button("🗑️ Delete Game", key=f"delete_{game_data['id']}", type="secondary", help="Permanently delete this game")
+
     if cancel_button:
         del st.session_state[f"editing_game_{game_data['id']}"]
         st.rerun()
+
+    if delete_button:
+        if st.session_state.get(f"confirm_delete_{game_data['id']}", False):
+            try:
+                GameRepository.delete(game_data["id"])
+                st.success("Game deleted successfully!")
+                del st.session_state[f"editing_game_{game_data['id']}"]
+                del st.session_state[f"confirm_delete_{game_data['id']}"]
+                st.rerun()
+            except Exception as e:
+                st.error(f"Failed to delete game: {e}")
+        else:
+            st.session_state[f"confirm_delete_{game_data['id']}"] = True
+            st.warning("Are you sure you want to delete this game? Click Delete again to confirm.")
+            return
 
     if save_button:
         if winner == loser:
@@ -109,8 +129,10 @@ def render_edit_game_form(game_data: Dict[str, Any]) -> None:
 
 def edit_game_modal(game_data: Dict[str, Any]) -> None:
     """Show edit game modal"""
-    if st.button("Edit", key=f"edit_button_{game_data['id']}"):
-        st.session_state[f"editing_game_{game_data['id']}"] = True
+    col1, col2 = st.columns([0.85, 0.15])
+    with col2:
+        if st.button("Edit", key=f"edit_button_{game_data['id']}"):
+            st.session_state[f"editing_game_{game_data['id']}"] = True
 
     if st.session_state.get(f"editing_game_{game_data['id']}", False):
         with st.expander("Edit Game", expanded=True):
