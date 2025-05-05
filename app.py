@@ -21,8 +21,30 @@ render_game_history()
 # Player statistics section
 st.header("Player Statistics")
 
-# Overall win rates (always show all games)
-visualizer.plot_player_win_rates()
+# Overall win rates (show all games as default)
+overall_start_date = st.date_input(
+                "Stats From Date",
+                value=None,
+                key="overall_start_date",
+                help="Start date for player statistics (inclusive)"
+            )
+overall_end_date = st.date_input(
+                "Stats To Date",
+                value=None,
+                key="overall_end_date",
+                help="End date for player statistics (inclusive)"
+            )
+overall_edition_filter = st.selectbox(
+                "Stats Edition",
+                ["All"] + Edition.list()[1:],
+                key="overall_edition_filter"
+            )
+overall_format_filter = st.selectbox(
+                "Stats Format",
+                ["All"] + GameFormat.list(),  # Include all formats
+                key="overall_format_filter"
+            )
+visualizer.plot_player_win_rates(start_date=overall_start_date, end_date=overall_end_date, edition_filter=overall_edition_filter, format_filter=overall_format_filter)
 
 # Player details with separate filters
 players = PlayerRepository.get_all()

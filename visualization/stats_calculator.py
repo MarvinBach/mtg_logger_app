@@ -9,9 +9,24 @@ class StatsCalculator:
         self.data_provider = data_provider
         self.players = self.data_provider.get_players()
 
-    def calculate_player_win_rates(self) -> pd.DataFrame:
+    def calculate_player_win_rates(self, start_date=None, end_date=None, edition_filter="All", format_filter="All") -> pd.DataFrame:
         """Calculate win rates for all players using all games in database"""
         games = self.data_provider.get_games()  # Get ALL games
+
+        # Apply date filter if specified
+        if start_date:
+            games = [g for g in games if datetime.fromisoformat(g["played_at"]).date() >= start_date]
+        if end_date:
+            games = [g for g in games if datetime.fromisoformat(g["played_at"]).date() <= end_date]
+
+        # Apply edition filter if specified
+        if edition_filter != "All":
+            games = [g for g in games if g["edition"] == edition_filter]
+
+        # Apply format filter if specified
+        if format_filter != "All":
+            games = [g for g in games if g["format"] == format_filter]
+
         win_counts: Dict[int, int] = {}
         loss_counts: Dict[int, int] = {}
 
@@ -36,7 +51,10 @@ class StatsCalculator:
                 "Win Rate (%)": win_rate,
             })
 
+        if not stats:
+            return pd.DataFrame()
         return pd.DataFrame(stats).sort_values(by="Win Rate (%)", ascending=False)
+
 
     def calculate_player_matchups(self, player_name: str, start_date=None, end_date=None, edition_filter="All", format_filter="All"):
         """Calculate win rates against other players"""

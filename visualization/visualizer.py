@@ -6,9 +6,9 @@ class DataVisualizer:
     def __init__(self, stats_calculator: StatsCalculator):
         self.stats_calculator = stats_calculator
 
-    def plot_player_win_rates(self) -> None:
+    def plot_player_win_rates(self, start_date=None, end_date=None, edition_filter="All", format_filter="All") -> None:
         """Display win rates for all players"""
-        win_rates = self.stats_calculator.calculate_player_win_rates()
+        win_rates = self.stats_calculator.calculate_player_win_rates(start_date=start_date, end_date=end_date, edition_filter=edition_filter, format_filter=format_filter)
         if win_rates.empty:
             st.info("No games recorded yet.")
             return
