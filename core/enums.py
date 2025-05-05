@@ -3,7 +3,6 @@ from enum import Enum
 class GameFormat(Enum):
     """Available game formats"""
     DRAFT = "Draft"
-    CUBE_DRAFT = "Cube Draft"
     SEALED = "Sealed"
     CONSTRUCTED = "Constructed"
     COMMANDER = "Commander"
@@ -37,6 +36,7 @@ class Edition(Enum):
     DUSKMOURN = "Duskmourn"
     OUTLAWS = "Outlaws of Thunder Junction"
     LOTR = "Lord of the Rings"
+    OLLIS_CUBE = "Ollis Cube"
 
     @classmethod
     def list(cls) -> list[str]:
