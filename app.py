@@ -23,24 +23,24 @@ st.header("Player Statistics")
 
 # Overall win rates (show all games as default)
 overall_start_date = st.date_input(
-                "Stats From Date",
+                "From Date",
                 value=None,
                 key="overall_start_date",
                 help="Start date for player statistics (inclusive)"
             )
 overall_end_date = st.date_input(
-                "Stats To Date",
+                "To Date",
                 value=None,
                 key="overall_end_date",
                 help="End date for player statistics (inclusive)"
             )
 overall_edition_filter = st.selectbox(
-                "Stats Edition",
+                "Edition",
                 ["All"] + Edition.list()[1:],
                 key="overall_edition_filter"
             )
 overall_format_filter = st.selectbox(
-                "Stats Format",
+                "Format",
                 ["All"] + GameFormat.list(),  # Include all formats
                 key="overall_format_filter"
             )
