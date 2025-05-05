@@ -13,7 +13,6 @@ class DataVisualizer:
             st.info("No games recorded yet.")
             return
 
-        st.subheader("Overall Win Rates")
         st.dataframe(
             win_rates.style.format({
                 "Win Rate (%)": "{:.1f}%",

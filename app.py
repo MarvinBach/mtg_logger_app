@@ -22,6 +22,7 @@ render_game_history()
 st.header("Player Statistics")
 
 # Overall win rates (show all games as default)
+st.subheader("Overall Win Rates")
 overall_start_date = st.date_input(
                 "From Date",
                 value=None,
