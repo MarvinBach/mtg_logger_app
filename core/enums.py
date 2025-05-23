@@ -36,6 +36,8 @@ class Edition(Enum):
     DUSKMOURN = "Duskmourn"
     OUTLAWS = "Outlaws of Thunder Junction"
     LOTR = "Lord of the Rings"
+    DOMINARIA = "Dominaria Remastered"
+    KAMIGAWA = "Kamigawa"
     OLLIS_CUBE = "Ollis Cube"
 
     @classmethod
