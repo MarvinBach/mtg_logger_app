@@ -29,6 +29,7 @@ class Color(Enum):
 class Edition(Enum):
     """Available card editions"""
     NONE = "None"
+    FINAL_FANTASY = "Final Fantasy"
     TARKIR = "Tarkir Dragonstorm"
     AETHERDRIFT = "Aetherdrift"
     INNISTRAD = "Innistrad Remastered"
